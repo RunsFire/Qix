@@ -1,0 +1,146 @@
+if cw and act == 0:
+        # Test pour sortir de la bordure
+        if inbg and cxSparx == droite and last == "down" and h and b :  # Si Sparx à droite
+            dxSparx = -2*depSparx
+            last = "left"
+
+        elif inhg and cySparx == bas and last == "left" and g and d :   # Si Sparx en bas
+            dySparx = -2*depSparx
+            last = "up"
+
+        elif inhd and cxSparx == gauche and last == "up" and h and b :  # Si Sparx à gauche
+            dxSparx = 2*depSparx
+            last = "right"
+           
+        elif inbd and cySparx == haut and last == "right" and g and d : # Si Sparx en haut
+            dySparx = 2*depSparx
+            last = "down"
+           
+        # Test pour se déplacer autour de la safezone (intérieur)
+        elif h and b and d and g :
+            if inup :                           # Si point haut dans zone :
+                if inbd :                   # Si bas-droite
+                    dySparx = depSparx
+                    last = "down"
+                else :                      # Sinon
+                    dxSparx = depSparx
+                    last = "right"
+
+
+            elif inleft :                   # Si gauche :
+                dySparx = -depSparx
+                last = "up"
+
+
+            elif indown :                   # Si bas :
+                dxSparx = -depSparx
+                last = "left"
+
+
+            elif inright :                  # Si droite :
+                dySparx = depSparx
+                last = "down"
+
+
+            elif inbg and last != "left" :  # Si bas-gauche et dernier mvt différent de gauche :
+                dxSparx = -depSparx         # (utilisé pour empêcher un arrêt du sparx dans une situation)
+                last = "left"
+
+
+            elif inbd :                     # Si bas-droite :
+                dySparx = depSparx
+                last = "down"
+
+
+            elif inhd :                     # Si haut-droite :
+                if last == "down" :     # Si dernier mvt vers le bas
+                    dxSparx = depSparx
+                    last = "right"
+
+
+                elif last == "right" :  # Si dernier mvt vers la droite
+                    dySparx = depSparx
+                    last = "down"
+
+
+            elif inhg :                     # Si haut-gauche
+                if last == "right" :              
+                    dySparx = -depSparx
+                    last = "up"
+        
+        if dySparx != 0 or dxSparx != 0 :
+            act = 1
+
+
+
+
+    if cw is False and act == 0 :
+        print(cxSparx,cySparx)
+        print(last)
+        # Test pour sortir de la bordure
+        if inbd and cxSparx == gauche and last == "down" and h and b :  # Si Sparx à gauche
+            dxSparx = 2*depSparx
+            last = "right"
+
+        elif inhd and cySparx == bas and last == "right" and g and d :   # Si Sparx en bas
+            dySparx = -2*depSparx
+            last = "up"
+
+        elif inhg and cxSparx == droite and last == "up" and h and b :  # Si Sparx à droite
+            dxSparx = -2*depSparx
+            last = "left"
+
+        elif inbg and cySparx == haut and last == "left" and g and d : # Si Sparx en haut
+            dySparx = 2*depSparx
+            last = "down"
+
+
+        # Test pour se déplacer autour de la safezone (intérieur)
+        elif h and b and d and g :
+            if inup :                           # Si point haut dans zone :
+                if inbd :                   # Si bas-droite :
+                    dySparx = depSparx    
+                    last = "up"
+                else :                      # Sinon
+                    dxSparx = -depSparx
+                    last = "left"
+
+            elif inleft :                       # Si gauche :
+                dySparx = depSparx
+                last = "down"
+
+            elif indown :                       # Si bas :
+                dxSparx = -depSparx
+                last = "right"
+
+            elif inright :                      # Si droite :
+                dySparx = -depSparx
+                last = "up"
+
+            elif inbg and last != "right" :     # Si bas-gauche et dernier mvt était vers la droite :
+                dxSparx = -depSparx             # (utilisé pour empêcher un arrêt du sparx dans une situation)
+                last = "right"
+
+            elif inbd :                         # Si bas-droite :
+                dySparx = depSparx
+                last = "up"
+
+            elif inhd :                         # Si haut-droite
+                if last == "left" :         # Si dernier mvt était vers la gauche :
+                    dySparx = -depSparx
+                    last = "up"
+
+                elif last == "up" :         # Si dernier mvt vers le haut :  
+                    dxSparx = -depSparx
+                    last = "left"
+
+            elif inhg :                         # Si haut-gauche :
+                if last == "down" :              
+                    dxSparx = -depSparx
+                    last = "left"
+        
+        if dxSparx != 0 or dySparx != 0 :
+            act = 1
+
+        else :
+            act = 0
