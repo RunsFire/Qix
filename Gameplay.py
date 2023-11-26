@@ -10,7 +10,6 @@
 
 
 
-from calendar import c
 from fltk import *
 from Calculs import *
 from Interface import *
@@ -83,8 +82,6 @@ def test_sortie_safezone(lst_safezone, cx, cy, dx, dy, dep) :
 
 
 
-
-
 def test_entree_safezone(lst_safezone, cx, cy) :
     """Renvoie True si le joueur rentre dans la safezone."""
 
@@ -124,8 +121,6 @@ def test_interieur_safezone(lst_coordonnees, cx, cy) :
         return False
     else :
         return True
-
-
 
 
 
@@ -173,156 +168,11 @@ def mouvement_sparx(cxSparx, cySparx, cw, last) :
     # last : Dernière direction
 
 
-    if cw and act == 0:
-        # Test pour sortir de la bordure
-        if inbg and cxSparx == droite and last == "down" and h and b :  # Si Sparx à droite
-            dxSparx = -2*depSparx
-            last = "left"
-
-        elif inhg and cySparx == bas and last == "left" and g and d :   # Si Sparx en bas
-            dySparx = -2*depSparx
-            last = "up"
-
-        elif inhd and cxSparx == gauche and last == "up" and h and b :  # Si Sparx à gauche
-            dxSparx = 2*depSparx
-            last = "right"
-           
-        elif inbd and cySparx == haut and last == "right" and g and d : # Si Sparx en haut
-            dySparx = 2*depSparx
-            last = "down"
-           
-        # Test pour se déplacer autour de la safezone (intérieur)
-        elif h and b and d and g :
-            if inup :                           # Si point haut dans zone :
-                if inbd :                   # Si bas-droite
-                    dySparx = depSparx
-                    last = "down"
-                else :                      # Sinon
-                    dxSparx = depSparx
-                    last = "right"
-
-
-            elif inleft :                   # Si gauche :
-                dySparx = -depSparx
-                last = "up"
-
-
-            elif indown :                   # Si bas :
-                dxSparx = -depSparx
-                last = "left"
-
-
-            elif inright :                  # Si droite :
-                dySparx = depSparx
-                last = "down"
-
-
-            elif inbg and last != "left" :  # Si bas-gauche et dernier mvt différent de gauche :
-                dxSparx = -depSparx         # (utilisé pour empêcher un arrêt du sparx dans une situation)
-                last = "left"
-
-
-            elif inbd :                     # Si bas-droite :
-                dySparx = depSparx
-                last = "down"
-
-
-            elif inhd :                     # Si haut-droite :
-                if last == "down" :     # Si dernier mvt vers le bas
-                    dxSparx = depSparx
-                    last = "right"
-
-
-                elif last == "right" :  # Si dernier mvt vers la droite
-                    dySparx = depSparx
-                    last = "down"
-
-
-            elif inhg :                     # Si haut-gauche
-                if last == "right" :              
-                    dySparx = -depSparx
-                    last = "up"
-        
-        if dySparx != 0 or dxSparx != 0 :
-            act = 1
+    
 
 
 
-
-    if cw is False and act == 0 :
-        print(cxSparx,cySparx)
-        print(last)
-        # Test pour sortir de la bordure
-        if inbd and cxSparx == gauche and last == "down" and h and b :  # Si Sparx à gauche
-            dxSparx = 2*depSparx
-            last = "right"
-
-        elif inhd and cySparx == bas and last == "right" and g and d :   # Si Sparx en bas
-            dySparx = -2*depSparx
-            last = "up"
-
-        elif inhg and cxSparx == droite and last == "up" and h and b :  # Si Sparx à droite
-            dxSparx = -2*depSparx
-            last = "left"
-
-        elif inbg and cySparx == haut and last == "left" and g and d : # Si Sparx en haut
-            dySparx = 2*depSparx
-            last = "down"
-
-
-        # Test pour se déplacer autour de la safezone (intérieur)
-        elif h and b and d and g :
-            if inup :                           # Si point haut dans zone :
-                if inbd :                   # Si bas-droite :
-                    dySparx = depSparx    
-                    last = "up"
-                else :                      # Sinon
-                    dxSparx = -depSparx
-                    last = "left"
-
-            elif inleft :                       # Si gauche :
-                dySparx = depSparx
-                last = "down"
-
-            elif indown :                       # Si bas :
-                dxSparx = -depSparx
-                last = "right"
-
-            elif inright :                      # Si droite :
-                dySparx = -depSparx
-                last = "up"
-
-            elif inbg and last != "right" :     # Si bas-gauche et dernier mvt était vers la droite :
-                dxSparx = -depSparx             # (utilisé pour empêcher un arrêt du sparx dans une situation)
-                last = "right"
-
-            elif inbd :                         # Si bas-droite :
-                dySparx = depSparx
-                last = "up"
-
-            elif inhd :                         # Si haut-droite
-                if last == "left" :         # Si dernier mvt était vers la gauche :
-                    dySparx = -depSparx
-                    last = "up"
-
-                elif last == "up" :         # Si dernier mvt vers le haut :  
-                    dxSparx = -depSparx
-                    last = "left"
-
-            elif inhg :                         # Si haut-gauche :
-                if last == "down" :              
-                    dxSparx = -depSparx
-                    last = "left"
-        
-        if dxSparx != 0 or dySparx != 0 :
-            act = 1
-
-        else :
-            act = 0
-
-
-
-    if act == 0 :
+    if act == 0 :           # Déplacements sur la bordure
         
         if cySparx == haut :
             if cxSparx == droite and cw :
@@ -401,9 +251,14 @@ def mouvement_sparx(cxSparx, cySparx, cw, last) :
 #   *                                                                   *
 #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
 
+#   .   .   .   .   .   Variables à initialiser pour l'export   .   .   .   .   .
 
+zonetot = 0     # Ratio entre les zones capturées par les joueurs et le terrain de jeu
+zone_a_capture = 75
+nbVies = 3
+niveau = 1
 
-
+#   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 
 
 if __name__ == "__main__" :
@@ -420,23 +275,25 @@ if __name__ == "__main__" :
     #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
 
 
+    #   .   .   .   .   .   Variables à initialiser .   .   .   .   .
 
+    
+    back,limite_d = "",""
+    change = True
+    last1, last2 = "",""
+    
 
+    #   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 
 
     #   ========= Définition de la zone de jeu =========
 
 
     coin_sup_gauche, coin_inf_droite = ecran_launch()                  
-    nbVies = 3
     Perdu = False
     dessiner = False
     nb_delai = 10                   #   -   -   -   -   -   -   -   -   -   -   Nombre qui indique le délai entre les déplacements du QIX
     a = 0                           #   -   -   -   -   -   -   -   -   -   -   Nombre qui incrémente à chaque exécution d'une boucle
-    niveau = 1
-    texte(5,25, 'Vies : ' + str(nbVies), "Violet", "nw", taille = 10, tag = "nbVies")
-
-
 
 
 
@@ -449,16 +306,12 @@ if __name__ == "__main__" :
 
 
 
-
-
     #   ========= Définition du Qix =========
 
 
     cxQIX = largeurFenetre // 2                    
     cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
     carre(cxQIX-5,cyQIX-5,10,"Red","Red","QIX",None)
-
-
 
 
 
@@ -477,16 +330,12 @@ if __name__ == "__main__" :
 
 
 
-
-
     #   ========= Liste des coordonées =========
 
 
     lst_coordonnees_curseur = []    #   -   -   -   -   -   -   -   -   -   -   Liste des coordonnées des cases où le curseur est passé
-    lst_coordonnees_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[800,175],coin_sup_gauche]    #   Liste des sommets que le joueur n'a pas encore capturé
+    lst_coordonnees_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche]    #   Liste des sommets que le joueur n'a pas encore capturé
     lst_coordonnees_polygones = [[coin_sup_gauche,[coin_inf_droite[0],coin_sup_gauche[1]],coin_inf_droite,[coin_sup_gauche[0],coin_inf_droite[1]]]] #   Coordonnées des différents polygones formés par le joueur
-
-
 
 
 
@@ -496,10 +345,6 @@ if __name__ == "__main__" :
 
 
 
-
-
-
-    zonetot = 0                     #   -   -   -   -   -   -   -   -   -   -   Ratio entre les zones capturées par les joueurs et le terrain de jeu
     zonemax = aire([[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[800,175],coin_sup_gauche], True)   # Aire total de la zone de jeu
     dep = 10                         #   -   -   -   -   -   -   -   -   -   -   Vitesse de déplacement du Joueur
     depQIX = 1                      #   -   -   -   -   -   -   -   -   -   -   Vitesse de déplacement du QIX
@@ -509,21 +354,7 @@ if __name__ == "__main__" :
 
 
 
-    #   .   .   .   .   .   Variables à initialiser .   .   .   .   .
 
-
-
-
-    back,limite_d = "",""
-    change = True
-    last1, last2 = "",""
-
-
-    #   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-
-
-
-    
 
     #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
     #   *                                Qix                                *
@@ -663,8 +494,6 @@ if __name__ == "__main__" :
                 if coordonnees_debut == [] :    # Toggle pour savoir si le joueur dessine ou pas
                     if dessiner == False :
                         dessiner = True
-                    else :
-                        dessiner = False
             if nom_touche == 'Left':
                 dx = max(-dep, coin_sup_gauche[0] - cx)
             elif nom_touche == 'Right':
@@ -673,6 +502,10 @@ if __name__ == "__main__" :
                 dy = min(dep, coin_inf_droite[1] - cy)
             elif nom_touche == 'Up':
                 dy = max(-dep, coin_sup_gauche[1] - cy)
+
+
+            print(cx,cy)
+
             if dx != 0 or dy != 0:
                 efface('curseur')
                 Perdu = test_perte(coordonnees_debut, [cx+dx, cy+dy], [cxQIX-5, cyQIX-5], 10, lst_coordonnees_curseur)
@@ -726,7 +559,7 @@ if __name__ == "__main__" :
                             coordonnees_debut = []
                             coordonnees_supprime = None
                             Perdu = False
-                            texte(5,5, str(round(zonetot,2)) + " %", "Red", "nw", taille = 10, tag = "Zonecapturee")
+                            score(zonetot)
 
 
 
@@ -778,7 +611,8 @@ if __name__ == "__main__" :
             curseur(cx, cy, rayon)
 
 
-
+            if niveau%5 == 0 :
+                zone_a_capture += 1
 
             efface("Sparx")
             depSparx += 0.125
@@ -805,11 +639,9 @@ if __name__ == "__main__" :
 
             zonetot = 0
             efface("Zonecapturee")
-            texte(5,5, str(zonetot) + " %", "Red", "nw", taille = 10, tag = "Zonecapturee")
-
-
             efface("nbVies")
-            texte(5,25, 'Vies : ' + str(nbVies), "Violet", "nw", taille = 10, tag = "nbVies")
+            score(zonetot)
+            update_round(zone_a_capture,nbVies,niveau)
 
 
             efface("ZoneC")
@@ -856,10 +688,7 @@ if __name__ == "__main__" :
 
 
             efface("nbVies")
-            if nbVies == 1 :
-                texte(5,25, 'Vie : ' + str(nbVies), "Violet", "nw", taille = 10, tag = "nbVies")
-            else :
-                texte(5,25, 'Vies : ' + str(nbVies), "Violet", "nw", taille = 10, tag = "nbVies")
+            update_round(zone_a_capture,nbVies,niveau)
 
 
             dessiner = False
