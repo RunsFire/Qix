@@ -337,6 +337,16 @@ def mouvement_sparx(cxSparx, cySparx, cw, last) :
 #   *                                                                   *
 #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
 
+#   .   .   .   .   .   Variables à initialiser pour l'export   .   .   .   .   .
+
+zonetot = 0     # Ratio entre les zones capturées par les joueurs et le terrain de jeu
+zone_a_capture = 75
+nbVies = 3
+niveau = 1
+
+#   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+
 if __name__ == "__main__" :
 
    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
@@ -349,7 +359,6 @@ if __name__ == "__main__" :
 
 
     coin_sup_gauche, coin_inf_droite = ecran_launch()                 
-    nbVies = 3
     Perdu = False
     dessiner = False
     nb_delai = 10                   
@@ -357,9 +366,6 @@ if __name__ == "__main__" :
 
     a = 0
     # Nombre qui incrémente à chaque exécution d'une boucle
-    
-    niveau = 1
-    texte(5,25, 'Vies : ' + str(nbVies), "Violet", "nw", taille = 10, tag = "nbVies")
 
 
     cx, cy, rayon = largeurFenetre // 2, coin_inf_droite[1], 5   #  -   -   -   -   -   -   -   Taille et position du curseur
@@ -404,8 +410,7 @@ if __name__ == "__main__" :
     coordonnees_debut_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche]
     # Coordonnées au début (ou à la fin) de la safezone uniquement utile pour la fonction debut_egal_fin
 
-    zonetot = 0
-    # Ratio entre les zones capturées par les joueurs et le terrain de jeu
+
 
     zonemax = aire([[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[800,175],coin_sup_gauche], True)
     # Aire total de la zone de jeu
@@ -435,7 +440,8 @@ if __name__ == "__main__" :
    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
 
 
-   # Les déplacements seront changés, pas assez aléatoire et le Qix a tendance à ne pas beaucoup bouger d'un endroit
+    # Les déplacements seront changés, pas assez aléatoire et le Qix a tendance à ne pas beaucoup bouger d'un endroit
+
 
     while True :
         if a % nb_delai == 0 :
@@ -466,7 +472,6 @@ if __name__ == "__main__" :
                         dxQIX = max(-depQIX, coin_sup_gauche[0]+5 - cxQIX)                       # Déplacement -> Ouest
                     else :
                         pass
-                   
                 else :
                     if x == 1 and (limite_d != "nord" or limite_d != "est") :
                         dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]-5 - cxQIX))       # Déplacement -> Nord-Est
@@ -539,9 +544,6 @@ if __name__ == "__main__" :
                 if coordonnees_debut == [] :    # Toggle pour savoir si le joueur dessine ou pas
                     if dessiner == False :
                         dessiner = True
-                    else :
-                        dessiner = False
- 
             if nom_touche == 'Left':
                 dx = max(-dep, coin_sup_gauche[0] - cx)
             elif nom_touche == 'Right':
@@ -578,7 +580,9 @@ if __name__ == "__main__" :
                             lst_coordonnees_curseur = cw_a_ccw(lst_coordonnees_curseur) # Fonction pour faire en sorte que les coordonnées du polygone formé par le joueur soit dans le sens contraine de l'aiguille d'une montre (ccw)
                             lst_coordonnees_safezone, coordonnees_supprime = concatenation_safezone(lst_coordonnees_safezone, lst_coordonnees_curseur)  # Ajout et suppression des coordonnées de la safezone
                             lst_coordonnees_safezone, coordonnees_debut_safezone = debut_egal_fin(lst_coordonnees_safezone, coordonnees_debut_safezone) # Modification des 2 premiers ou derniers éléments de la safezone pour qu'elles soient les mêmes
-
+                                #    lst_coordonnees_safezone, coordonnees_debut_safezone = debut_egal_fin(lst_coordonnees_safezone, coordonnees_debut_safezone) # Modification des 2 premiers ou derniers éléments de la safezone pour qu'elles soient les mêmes
+                                #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                #ValueError: too many values to unpack (expected 2)
 
                             if coordonnees_supprime != None :   # Pour ne pas écraser les polygones précedemment faits par le joueur
                                 lst_coordonnees_curseur = lst_coordonnees_curseur + coordonnees_supprime
@@ -599,8 +603,12 @@ if __name__ == "__main__" :
                             coordonnees_debut = []
                             coordonnees_supprime = None
                             Perdu = False
-                            texte(5,5, str(round(zonetot,2)) + " %", "Red", "nw", taille = 10, tag = "Zonecapturee")
-                            print(lst_coordonnees_safezone)
+                            score(zonetot)
+
+
+
+
+
 
 
         if encadrement_deux_sens(cxSparx1-5,cx,cxSparx1+5,True,True) and encadrement_deux_sens(cySparx1-5,cy,cySparx1+5,True,True) :    # Si l'un des deux Sparx entre en contact avec le joueur
@@ -631,6 +639,10 @@ if __name__ == "__main__" :
             cx, cy = largeurFenetre // 2, coin_inf_droite[1]
             curseur(cx, cy, rayon)
 
+
+            if niveau%5 == 0 :
+                zone_a_capture += 1
+
             efface("Sparx")
             depSparx += 0.125
             cxSparx1, cxSparx2 = largeurFenetre // 2, largeurFenetre // 2
@@ -644,15 +656,18 @@ if __name__ == "__main__" :
             cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
             carre(cxQIX-5,cyQIX-5,10,"Red","Red","QIX",None)
 
+
+
+
             zonetot = 0
             efface("Zonecapturee")
-            texte(5,5, str(zonetot) + " %", "Red", "nw", taille = 10, tag = "Zonecapturee")
-
             efface("nbVies")
-            texte(5,25, 'Vies : ' + str(nbVies), "Violet", "nw", taille = 10, tag = "nbVies")
+            score(zonetot)
+            update_round(zone_a_capture,nbVies,niveau)
+
 
             efface("ZoneC")
-            
+           
             dessiner = False
             lst_coordonnees_curseur = []
             coordonnees_debut = []
@@ -678,13 +693,12 @@ if __name__ == "__main__" :
             cxQIX = largeurFenetre // 2
             cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
             carre(cxQIX-5,cyQIX-5,10,"Red","Red","QIX",None)
- 
+
+
             efface("nbVies")
-            if nbVies == 1 :
-                texte(5,25, 'Vie : ' + str(nbVies), "Violet", "nw", taille = 10, tag = "nbVies")
-            else :
-                texte(5,25, 'Vies : ' + str(nbVies), "Violet", "nw", taille = 10, tag = "nbVies")
- 
+            update_round(zone_a_capture,nbVies,niveau)
+
+
             dessiner = False
             lst_coordonnees_curseur = []
             coordonnees_debut = []
@@ -696,4 +710,4 @@ if __name__ == "__main__" :
         a += 1
 
 
-ferme_fenetre()
+    ferme_fenetre()
