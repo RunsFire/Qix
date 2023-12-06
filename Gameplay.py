@@ -59,6 +59,7 @@ def test_entree_safezone(lst_safezone, cx, cy) :
     for i in range (len(lst_safezone)-1) :
         if (encadrement_deux_sens(lst_safezone[i][0],cx,lst_safezone[i+1][0],True,True)) and cy == lst_safezone[i][1] :
             return True
+        
         elif (encadrement_deux_sens(lst_safezone[i][1],cy,lst_safezone[i+1][1],True,True)) and cx == lst_safezone[i][0] :
             return True
     return False
@@ -69,15 +70,13 @@ def test_interieur_safezone(lst_coordonnees, cx, cy) :
     nb = 0
     for i in range (len(lst_coordonnees)) :
         for j in range (len(lst_coordonnees[i])) :
-            if lst_coordonnees[i][j][0] >= cx :
+            if lst_coordonnees[i][j][0] > cx :
                 continue
             if j == len(lst_coordonnees[i])-1 :
-                if (encadrement_deux_sens(lst_coordonnees[i][j][1],cy,lst_coordonnees[i][0][1],False,False)
-                or  lst_coordonnees[i][j][1] == cy == lst_coordonnees[i][0][1]) :
+                if encadrement_deux_sens(lst_coordonnees[i][j][1],cy,lst_coordonnees[i][0][1],True,False) :
                     nb += 1
             else :
-                if (encadrement_deux_sens(lst_coordonnees[i][j][1],cy,lst_coordonnees[i][j+1][1],False,False)
-                or  lst_coordonnees[i][j][1] == cy == lst_coordonnees[i][j+1][1]) :
+                if encadrement_deux_sens(lst_coordonnees[i][j][1],cy,lst_coordonnees[i][j+1][1],True,False) :
                     nb += 1
     if nb % 2 == 0 :
         return False
@@ -417,7 +416,7 @@ if __name__ == "__main__" :
     zonemax = aire([[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[800,175],coin_sup_gauche], True)
     # Aire total de la zone de jeu
 
-    dep = 10
+    dep = 5
     # Vitesse de déplacement du Joueur
 
     depQIX = 1
@@ -537,78 +536,73 @@ if __name__ == "__main__" :
         dx = 0
         dy = 0
 
+        if touche_pressee('Left'):
+            dx = max(-dep, coin_sup_gauche[0] - cx)
+        elif touche_pressee('Right'):
+            dx = min(dep, coin_inf_droite[0] - cx)
+        elif touche_pressee('Down'):
+            dy = min(dep, coin_inf_droite[1] - cy)
+        elif touche_pressee('Up'):
+            dy = max(-dep, coin_sup_gauche[1] - cy)
+        
+        if touche_pressee('Return') and not dessiner :
+            if coordonnees_debut == [] :    # Toggle pour savoir si le joueur dessine ou pas
+                dessiner = True
 
-        if tev == "Touche" :
-           
-            nom_touche = touche(ev)
+        if dx != 0 or dy != 0 :
+            efface('curseur')
+            Perdu = test_perte(coordonnees_debut, [cx+dx, cy+dy], [cxQIX-5, cyQIX-5], 10, lst_coordonnees_curseur)
+            cx += dx
+            cy += dy
 
-            if nom_touche == 'Return' :
-                if coordonnees_debut == [] :    # Toggle pour savoir si le joueur dessine ou pas
-                    if dessiner == False :
-                        dessiner = True
-            if nom_touche == 'Left':
-                dx = max(-dep, coin_sup_gauche[0] - cx)
-            elif nom_touche == 'Right':
-                dx = min(dep, coin_inf_droite[0] - cx)
-            elif nom_touche == 'Down':
-                dy = min(dep, coin_inf_droite[1] - cy)
-            elif nom_touche == 'Up':
-                dy = max(-dep, coin_sup_gauche[1] - cy)
-
-            
-            if dx != 0 or dy != 0:
-                efface('curseur')
-                Perdu = test_perte(coordonnees_debut, [cx+dx, cy+dy], [cxQIX-5, cyQIX-5], 10, lst_coordonnees_curseur)
-                cx += dx
-                cy += dy
-
-                if dessiner == True :
-                   
-                    if coordonnees_debut == [] :  # Test pour savoir si le joueur est sur une bordure
-                        coordonnees_debut = test_sortie_safezone(lst_coordonnees_safezone, cx, cy, dx, dy, dep)          # Test pour savoir si le joueur sort d'une bordure
-                        if coordonnees_debut != [] :
-                            if test_interieur_safezone([lst_coordonnees_safezone],cx-1,cy) :   # Test pour savoir si le joueur sort vers la zone de jeu
-                                ligne(cx - dx, cy - dy, cx, cy, "Gold", tag = "Trainée")
-                                lst_coordonnees_curseur.append([cx, cy])
-                            else :  # Si le joueur ne va pas vers la zone de jeu, il faut annuler le mouvement
-                                cx = cx - dx
-                                cy = cy - dy
-                                coordonnees_debut = []
-
-                    else :
-                        lst_coordonnees_curseur.append([cx, cy])
-                        ligne(cx - dx, cy - dy, cx, cy, "Gold", tag = "Trainée")
-
-                        if test_entree_safezone(lst_coordonnees_safezone,cx,cy) :       # Test pour savoir si le joueur entre dans la safezone
-                            lst_coordonnees_curseur.insert(0, coordonnees_debut)        # Insertion de la première coordonnée du polygone formé par le joueur
-                            lst_coordonnees_curseur = sommets(lst_coordonnees_curseur)  # Fonction pour réduire le nombre de coordonnées dans lst_coordonnees_curseur
-                            lst_coordonnees_curseur = cw_a_ccw(lst_coordonnees_curseur) # Fonction pour faire en sorte que les coordonnées du polygone formé par le joueur soit dans le sens contraine de l'aiguille d'une montre (ccw)
-                            lst_coordonnees_safezone, coordonnees_supprime = concatenation_safezone(lst_coordonnees_safezone, lst_coordonnees_curseur)  # Ajout et suppression des coordonnées de la safezone
-
-                            if coordonnees_supprime != None :   # Pour ne pas écraser les polygones précedemment faits par le joueur
-                                lst_coordonnees_curseur = lst_coordonnees_curseur + coordonnees_supprime
-
-                            if test_interieur_safezone([lst_coordonnees_safezone],cxQIX, cyQIX) :   # Si le QIX est à l'intérieur du polygone, le reste de la zone est capturé
-                                polygone(lst_coordonnees_curseur, "white", "green", tag = "ZoneC")
-                                lst_coordonnees_polygones.append(lst_coordonnees_curseur)
-                            else :
-                                polygone(lst_coordonnees_safezone, "white", "green", tag = "ZoneC")
-                                lst_coordonnees_polygones.append(lst_coordonnees_safezone)
-                                lst_coordonnees_safezone = list(lst_coordonnees_curseur)
-
-                            lst_coordonnees_safezone, coordonnees_debut_safezone = debut_egal_fin(lst_coordonnees_safezone, coordonnees_debut_safezone) # Modification des 2 premiers ou derniers éléments de la safezone pour qu'elles soient les mêmes
-                            lst_coordonnees_safezone = sommets(lst_coordonnees_safezone)
-                            print(lst_coordonnees_safezone)
-
-                            zonetot = ((zonemax - aire(lst_coordonnees_safezone,True)) / zonemax) * 100   # Calcul de l'aire
-                            efface("Trainée")
-                            efface("Zonecapturee")
-                            lst_coordonnees_curseur = []
+            if dessiner == True :
+               
+                if coordonnees_debut == [] :  # Test pour savoir si le joueur est sur une bordure
+                    coordonnees_debut = test_sortie_safezone(lst_coordonnees_safezone, cx, cy, dx, dy, dep)          # Test pour savoir si le joueur sort d'une bordure
+                    if coordonnees_debut != [] :
+                        if test_interieur_safezone([lst_coordonnees_safezone],cx,cy) :   # Test pour savoir si le joueur sort vers la zone de jeu
+                            ligne(cx - dx, cy - dy, cx, cy, "Gold", tag = "Trainée")
+                            lst_coordonnees_curseur.append([cx, cy])
+                        else :  # Si le joueur ne va pas vers la zone de jeu, il faut annuler le mouvement
+                            cx = cx - dx
+                            cy = cy - dy
                             coordonnees_debut = []
-                            coordonnees_supprime = None
-                            Perdu = False
-                            score(zonetot)
-                curseur(cx, cy, rayon)
+
+                else :
+                    lst_coordonnees_curseur.append([cx, cy])
+                    ligne(cx - dx, cy - dy, cx, cy, "Gold", tag = "Trainée")
+                    if Perdu == True :
+                        pass
+                    elif test_entree_safezone(lst_coordonnees_safezone,cx,cy) :       # Test pour savoir si le joueur entre dans la safezone
+                        lst_coordonnees_curseur.insert(0, coordonnees_debut)        # Insertion de la première coordonnée du polygone formé par le joueur
+                        lst_coordonnees_curseur = sommets(lst_coordonnees_curseur)  # Fonction pour réduire le nombre de coordonnées dans lst_coordonnees_curseur
+                        lst_coordonnees_curseur = cw_a_ccw(lst_coordonnees_curseur) # Fonction pour faire en sorte que les coordonnées du polygone formé par le joueur soit dans le sens contraine de l'aiguille d'une montre (ccw)
+                        lst_coordonnees_safezone, coordonnees_supprime = concatenation_safezone(lst_coordonnees_safezone, lst_coordonnees_curseur)  # Ajout et suppression des coordonnées de la safezone
+
+                        if coordonnees_supprime != None :   # Pour ne pas écraser les polygones précedemment faits par le joueur
+                            lst_coordonnees_curseur = lst_coordonnees_curseur + coordonnees_supprime
+
+                        if test_interieur_safezone([lst_coordonnees_safezone],cxQIX, cyQIX) :   # Si le QIX est à l'intérieur du polygone, le reste de la zone est capturé
+                            polygone(lst_coordonnees_curseur, "white", "green", tag = "ZoneC")
+                            lst_coordonnees_polygones.append(lst_coordonnees_curseur)
+                        else :
+                            polygone(lst_coordonnees_safezone, "white", "green", tag = "ZoneC")
+                            lst_coordonnees_polygones.append(lst_coordonnees_safezone)
+                            lst_coordonnees_safezone = list(lst_coordonnees_curseur)
+
+                        lst_coordonnees_safezone, coordonnees_debut_safezone = debut_egal_fin(lst_coordonnees_safezone, coordonnees_debut_safezone) # Modification des 2 premiers ou derniers éléments de la safezone pour qu'elles soient les mêmes
+                        lst_coordonnees_safezone = sommets(lst_coordonnees_safezone)
+                        print(lst_coordonnees_safezone)
+
+                        zonetot = ((zonemax - aire(lst_coordonnees_safezone,True)) / zonemax) * 100   # Calcul de l'aire
+                        efface("Trainée")
+                        efface("Zonecapturee")
+                        lst_coordonnees_curseur = []
+                        coordonnees_debut = []
+                        coordonnees_supprime = None
+                        Perdu = False
+                        score(zonetot)
+            curseur(cx, cy, rayon)
 
 
 
@@ -635,7 +629,7 @@ if __name__ == "__main__" :
    #   *                        Défaite / Victoire                         *
    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
      
-        if zonetot >= 75 :
+        if zonetot >= zone_a_capture :
             niveau += 1
             affichage_gagne(niveau)
 
@@ -655,7 +649,7 @@ if __name__ == "__main__" :
             sparx2 = sparx(cxSparx2, cySparx2)
 
             efface("QIX")
-            depQIX += 1
+            depQIX += 0.25
             cxQIX = largeurFenetre // 2
             cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
             carre(cxQIX-5,cyQIX-5,10,"Red","Red","QIX",None)
@@ -675,6 +669,7 @@ if __name__ == "__main__" :
             dessiner = False
             lst_coordonnees_curseur = []
             coordonnees_debut = []
+            coordonnees_debut_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche]
             lst_coordonnees_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche]
             lst_coordonnees_polygones = [[coin_sup_gauche,[coin_inf_droite[0],coin_sup_gauche[1]],coin_inf_droite,[coin_sup_gauche[0],coin_inf_droite[1]]]]
 
@@ -684,7 +679,8 @@ if __name__ == "__main__" :
             affichage_perdu(nbVies)
  
             efface('curseur')
-            cx, cy = largeurFenetre // 2, coin_inf_droite[1]
+            if coordonnees_debut != [] :
+                cx, cy = coordonnees_debut[0], coordonnees_debut[1]
             curseur(cx, cy, rayon)
  
             efface("Sparx")
