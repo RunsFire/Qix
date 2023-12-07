@@ -8,7 +8,7 @@ from fltk import *
 from Calculs import *
 from Interface import *
 from random import randint
-from math import sin, pi
+from math import sin, cos, pi
 
 #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
 #   *                                                                   *
@@ -136,140 +136,140 @@ def mouvement_sparx(cxSparx, cySparx, cw, last) :
         act = 1
 
 
-    if cw and act == 0:
+    #if cw and act == 0:
         # Test pour sortir de la bordure
-        if inbg and cxSparx == droite and last == "down" and h and b :  # Si Sparx à droite
-            dxSparx = -2*depSparx
-            last = "left"
+    #    if inbg and cxSparx == droite and last == "down" and h and b :  # Si Sparx à droite
+    #        dxSparx = -2*depSparx
+    #        last = "left"
 
-        elif inhg and cySparx == bas and last == "left" and g and d :   # Si Sparx en bas
-            dySparx = -2*depSparx
-            last = "up"
+    #    elif inhg and cySparx == bas and last == "left" and g and d :   # Si Sparx en bas
+    #        dySparx = -2*depSparx
+    #        last = "up"
 
-        elif inhd and cxSparx == gauche and last == "up" and h and b :  # Si Sparx à gauche
-            dxSparx = 2*depSparx
-            last = "right"
+    #    elif inhd and cxSparx == gauche and last == "up" and h and b :  # Si Sparx à gauche
+    #        dxSparx = 2*depSparx
+    #        last = "right"
          
-        elif inbd and cySparx == haut and last == "right" and g and d : # Si Sparx en haut
-            dySparx = 2*depSparx
-            last = "down"
+    #    elif inbd and cySparx == haut and last == "right" and g and d : # Si Sparx en haut
+    #        dySparx = 2*depSparx
+    #        last = "down"
          
         # Test pour se déplacer autour de la safezone (intérieur)
-        elif h and b and d and g :
-            if inup :                           # Si point haut dans zone :
-                if inbd :                   # Si bas-droite
-                    dySparx = depSparx
-                    last = "down"
-                else :                      # Sinon
-                    dxSparx = depSparx
-                    last = "right"
+    #    elif h and b and d and g :
+    #        if inup :                           # Si point haut dans zone :
+    #            if inbd :                   # Si bas-droite
+    #                dySparx = depSparx
+    #                last = "down"
+    #            else :                      # Sinon
+    #                dxSparx = depSparx
+    #                last = "right"
  
-            elif inleft :                   # Si gauche :
-                dySparx = -depSparx
-                last = "up"
+    #        elif inleft :                   # Si gauche :
+    #            dySparx = -depSparx
+    #            last = "up"
  
-            elif indown :                   # Si bas :
-                dxSparx = -depSparx
-                last = "left"
+    #        elif indown :                   # Si bas :
+    #            dxSparx = -depSparx
+    #            last = "left"
  
-            elif inright :                  # Si droite :
-                dySparx = depSparx
-                last = "down"
+    #        elif inright :                  # Si droite :
+    #            dySparx = depSparx
+    #            last = "down"
 
-            elif inbg and last != "left" :  # Si bas-gauche et dernier mvt différent de gauche :
-                dxSparx = -depSparx         # (utilisé pour empêcher un arrêt du sparx dans une situation)
-                last = "left"
+    #        elif inbg and last != "left" :  # Si bas-gauche et dernier mvt différent de gauche :
+    #            dxSparx = -depSparx         # (utilisé pour empêcher un arrêt du sparx dans une situation)
+    #            last = "left"
 
-            elif inbd :                     # Si bas-droite :
-                dySparx = depSparx
-                last = "down"
+    #        elif inbd :                     # Si bas-droite :
+    #            dySparx = depSparx
+    #            last = "down"
 
-            elif inhd :                     # Si haut-droite :
-                if last == "down" :     # Si dernier mvt vers le bas
-                    dxSparx = depSparx
-                    last = "right"
+    #        elif inhd :                     # Si haut-droite :
+    #            if last == "down" :     # Si dernier mvt vers le bas
+    #                dxSparx = depSparx
+    #                last = "right"
 
-                elif last == "right" :  # Si dernier mvt vers la droite
-                    dySparx = depSparx
-                    last = "down"
+    #            elif last == "right" :  # Si dernier mvt vers la droite
+    #                dySparx = depSparx
+    #                last = "down"
 
-            elif inhg :                     # Si haut-gauche
-                if last == "right" :             
-                    dySparx = -depSparx
-                    last = "up"
+    #        elif inhg :                     # Si haut-gauche
+    #            if last == "right" :             
+    #                dySparx = -depSparx
+    #                last = "up"
       
-        if dySparx != 0 or dxSparx != 0 :
-            act = 1
+    #    if dySparx != 0 or dxSparx != 0 :
+    #        act = 1
  
 
-    if cw is False and act == 0 :
-        # Test pour sortir de la bordure
-        if inbd and cxSparx == gauche and last == "down" and h and b :  # Si Sparx à gauche
-            dxSparx = 2*depSparx
-            last = "right"
+    #if cw is False and act == 0 :
+    #    # Test pour sortir de la bordure
+    #    if inbd and cxSparx == gauche and last == "down" and h and b :  # Si Sparx à gauche
+    #        dxSparx = 2*depSparx
+    #        last = "right"
 
-        elif inhd and cySparx == bas and last == "right" and g and d :   # Si Sparx en bas
-            dySparx = -2*depSparx
-            last = "up"
+    #    elif inhd and cySparx == bas and last == "right" and g and d :   # Si Sparx en bas
+    #        dySparx = -2*depSparx
+    #        last = "up"
 
-        elif inhg and cxSparx == droite and last == "up" and h and b :  # Si Sparx à droite
-            dxSparx = -2*depSparx
-            last = "left"
+    #    elif inhg and cxSparx == droite and last == "up" and h and b :  # Si Sparx à droite
+    #        dxSparx = -2*depSparx
+    #        last = "left"
 
-        elif inbg and cySparx == haut and last == "left" and g and d : # Si Sparx en haut
-            dySparx = 2*depSparx
-            last = "down"
+    #    elif inbg and cySparx == haut and last == "left" and g and d : # Si Sparx en haut
+    #        dySparx = 2*depSparx
+    #        last = "down"
 
 
         # Test pour se déplacer autour de la safezone (intérieur)
-        elif h and b and d and g :
-            if inup :                           # Si point haut dans zone :
-                if inbd :                   # Si bas-droite :
-                    dySparx = depSparx   
-                    last = "up"
-                else :                      # Sinon
-                    dxSparx = -depSparx
-                    last = "left"
+    #    elif h and b and d and g :
+    #        if inup :                           # Si point haut dans zone :
+    #            if inbd :                   # Si bas-droite :
+    #                dySparx = depSparx   
+    #                last = "up"
+    #            else :                      # Sinon
+    #                dxSparx = -depSparx
+    #                last = "left"
  
-            elif inleft :                       # Si gauche :
-                dySparx = depSparx
-                last = "down"
+    #        elif inleft :                       # Si gauche :
+    #            dySparx = depSparx
+    #            last = "down"
 
-            elif indown :                       # Si bas :
-                dxSparx = -depSparx
-                last = "right"
+    #        elif indown :                       # Si bas :
+    #            dxSparx = -depSparx
+    #            last = "right"
 
-            elif inright :                      # Si droite :
-                dySparx = -depSparx
-                last = "up"
+    #        elif inright :                      # Si droite :
+    #            dySparx = -depSparx
+    #            last = "up"
 
-            elif inbg and last != "right" :     # Si bas-gauche et dernier mvt était vers la droite :
-                dxSparx = -depSparx             # (utilisé pour empêcher un arrêt du sparx dans une situation)
-                last = "right"
+    #        elif inbg and last != "right" :     # Si bas-gauche et dernier mvt était vers la droite :
+    #            dxSparx = -depSparx             # (utilisé pour empêcher un arrêt du sparx dans une situation)
+    #            last = "right"
 
-            elif inbd :                         # Si bas-droite :
-                dySparx = depSparx
-                last = "up"
+    #        elif inbd :                         # Si bas-droite :
+    #            dySparx = depSparx
+    #            last = "up"
 
-            elif inhd :                         # Si haut-droite
-                if last == "left" :         # Si dernier mvt était vers la gauche :
-                    dySparx = -depSparx
-                    last = "up"
+    #        elif inhd :                         # Si haut-droite
+    #            if last == "left" :         # Si dernier mvt était vers la gauche :
+    #                dySparx = -depSparx
+    #                last = "up"
 
-                elif last == "up" :         # Si dernier mvt vers le haut : 
-                    dxSparx = -depSparx
-                    last = "left"
+    #            elif last == "up" :         # Si dernier mvt vers le haut : 
+    #                dxSparx = -depSparx
+    #                last = "left"
 
-            elif inhg :                         # Si haut-gauche :
-                if last == "down" :             
-                    dxSparx = -depSparx
-                    last = "left"
+    #        elif inhg :                         # Si haut-gauche :
+    #            if last == "down" :             
+    #                dxSparx = -depSparx
+    #                last = "left"
       
-        if dxSparx != 0 or dySparx != 0 :
-            act = 1
+    #    if dxSparx != 0 or dySparx != 0 :
+    #        act = 1
 
-        else :
-            act = 0
+    #    else :
+    #        act = 0
 
     if act == 0 :
       
@@ -344,6 +344,7 @@ zonetot = 0     # Ratio entre les zones capturées par les joueurs et le terrain
 zone_a_capture = 75
 nbVies = 3
 niveau = 1
+score = 0
 
 #   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 
@@ -431,7 +432,7 @@ if __name__ == "__main__" :
 
 
     back,limite_d = "",""
-    change = True
+    b = 0
     last1, last2 = "",""
 
 
@@ -447,12 +448,13 @@ if __name__ == "__main__" :
     while True :
         if a % nb_delai == 0 :
             a = 0
-            x = randint(0, 7)
             dxQIX = 0
             dyQIX = 0
-            back = limite_d         # Buffer qui garde en mémoire la dernière valeur de déplacement interdite
+            change = 5
+            b += 1
             card = ["nord","sud","est","ouest"]
-            while back == limite_d and change :         # Choisis la direction interdite aléatoirement, en faisant que celle-ci soit différente de la précédente et que ça ne change qu'une fois sur deux
+            if b%change == 0 :         # Choisis la direction aléatoirement, en faisant que celle-ci ne change qu'une fois sur deux
+                b = 0
                 limite_d = card[randint(0,3)]
 
             if change is False :    # Inverse le booléen "change"
@@ -460,34 +462,35 @@ if __name__ == "__main__" :
             else :
                 change = False
 
-            for i in range(randint(1, 16)) :
-               
-                if x == 0 or x == 2 or x == 4 or x == 6 :
-                    if x == 0 and limite_d != "nord" :
+            for i in range(randint(1, 20)) :
+                x = randint(0, 6)
+
+                # voir à modifier le déplacement du qix avec du sin et du pi
+                if x == 1 :
+                    if limite_d == "nord" :
                         dyQIX = max(-depQIX, coin_sup_gauche[1]+5 - cyQIX)                       # Déplacement -> Nord
-                    if x == 4 and limite_d != "sud" :
+                    if limite_d == "sud" :
                         dyQIX = min(depQIX, coin_inf_droite[1]-5 - cyQIX)                        # Déplacement -> Sud
-                    if x == 2 and limite_d != "est" :
+                    if limite_d == "est" :
                         dxQIX = min(depQIX, coin_inf_droite[0]-5 - cxQIX)                        # Déplacement -> Est
-                    if x == 6 and limite_d != "ouest" :
+                    if limite_d == "ouest" :
                         dxQIX = max(-depQIX, coin_sup_gauche[0]+5 - cxQIX)                       # Déplacement -> Ouest
-                    else :
-                        pass
-                else :
-                    if x == 1 and (limite_d != "nord" or limite_d != "est") :
+                elif x == 2 :
+                    if limite_d != "nord" or limite_d == "est" :
                         dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]-5 - cxQIX))       # Déplacement -> Nord-Est
                         dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1]+5 - cyQIX))
-                    if x == 3 and (limite_d != "sud" or limite_d != "est") :
-                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]-5 - cxQIX))       # Déplacement -> Sud-Est
-                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1]-5 - cyQIX))
-                    if x == 7 and (limite_d != "nord" or limite_d != "ouest") :
-                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0]+5 - cxQIX))      # Déplacement -> Nord-Ouest
-                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1]+5 - cyQIX))
-                    elif x == 5 and (limite_d != "sud" or limite_d != "ouest") :
+                    if limite_d == "sud" or limite_d == "ouest" :
                         dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0]+5 - cxQIX))      # Déplacement -> Sud-Ouest
                         dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1]-5 - cyQIX))
-                    else :
-                        pass
+                elif x == 3 :
+                    if limite_d == "nord" or limite_d == "ouest" :
+                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0]+5 - cxQIX))      # Déplacement -> Nord-Ouest
+                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1]+5 - cyQIX))
+                    if limite_d == "sud" or limite_d == "est" :
+                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]-5 - cxQIX))       # Déplacement -> Sud-Est
+                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1]-5 - cyQIX))
+                if cxQIX + dxQIX > coin_inf_droite[0] or cxQIX + dxQIX < coin_sup_gauche[0] or cyQIX + dyQIX > coin_inf_droite[1] or cyQIX + dyQIX < coin_sup_gauche[1] :
+                    break
                    
                 if dxQIX != 0 or dyQIX != 0 :
                     if test_interieur_safezone([lst_coordonnees_safezone],cxQIX,cyQIX):
@@ -495,6 +498,7 @@ if __name__ == "__main__" :
                         cyQIX += -dyQIX
                         efface("QIX")
                         carre(cxQIX-5,cyQIX-5,10,"Red","Red","QIX",None)
+
                     else :
                         cxQIX += dxQIX
                         cyQIX += dyQIX
@@ -545,8 +549,16 @@ if __name__ == "__main__" :
         elif touche_pressee('Up'):
             dy = max(-dep, coin_sup_gauche[1] - cy)
         
-        if touche_pressee('Return') and not dessiner :
+        if touche_pressee('Return') :
             if coordonnees_debut == [] :    # Toggle pour savoir si le joueur dessine ou pas
+                dep = 10
+                draw(1)
+                dessiner = True
+        
+        if touche_pressee('Control_R') :
+            if coordonnees_debut == [] :
+                dep = 5
+                draw(2)
                 dessiner = True
 
         if dx != 0 or dy != 0 :
@@ -555,7 +567,7 @@ if __name__ == "__main__" :
             cx += dx
             cy += dy
 
-            if dessiner == True :
+            if dessiner :
                
                 if coordonnees_debut == [] :  # Test pour savoir si le joueur est sur une bordure
                     coordonnees_debut = test_sortie_safezone(lst_coordonnees_safezone, cx, cy, dx, dy, dep)          # Test pour savoir si le joueur sort d'une bordure
@@ -582,11 +594,13 @@ if __name__ == "__main__" :
                         if coordonnees_supprime != None :   # Pour ne pas écraser les polygones précedemment faits par le joueur
                             lst_coordonnees_curseur = lst_coordonnees_curseur + coordonnees_supprime
 
+                        couleur = "green" if dep == 10 else "dark blue"
+
                         if test_interieur_safezone([lst_coordonnees_safezone],cxQIX, cyQIX) :   # Si le QIX est à l'intérieur du polygone, le reste de la zone est capturé
-                            polygone(lst_coordonnees_curseur, "white", "green", tag = "ZoneC")
+                            polygone(lst_coordonnees_curseur, "white", couleur, tag = "ZoneC")
                             lst_coordonnees_polygones.append(lst_coordonnees_curseur)
                         else :
-                            polygone(lst_coordonnees_safezone, "white", "green", tag = "ZoneC")
+                            polygone(lst_coordonnees_safezone, "white", couleur, tag = "ZoneC")
                             lst_coordonnees_polygones.append(lst_coordonnees_safezone)
                             lst_coordonnees_safezone = list(lst_coordonnees_curseur)
 
@@ -595,13 +609,15 @@ if __name__ == "__main__" :
                         print(lst_coordonnees_safezone)
 
                         zonetot = ((zonemax - aire(lst_coordonnees_safezone,True)) / zonemax) * 100   # Calcul de l'aire
+                        efface("score")
+                        score = score + int((aire(lst_coordonnees_safezone,True)*(15-dep))//10000)
                         efface("Trainée")
                         efface("Zonecapturee")
                         lst_coordonnees_curseur = []
                         coordonnees_debut = []
                         coordonnees_supprime = None
                         Perdu = False
-                        score(zonetot)
+                        update_act(zonetot, score)
             curseur(cx, cy, rayon)
 
 
@@ -654,13 +670,13 @@ if __name__ == "__main__" :
             cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
             carre(cxQIX-5,cyQIX-5,10,"Red","Red","QIX",None)
 
-            efface("niveau")
-
             zonetot = 0
             efface("Zonecapturee")
             efface("nbVies")
             efface("Zone_a_capturee")
-            score(zonetot)
+            efface("niveau")
+            efface("score")
+            update_act(zonetot, score)
             update_round(zone_a_capture,nbVies,niveau)
 
 
@@ -697,6 +713,8 @@ if __name__ == "__main__" :
 
             efface("nbVies")
             update_round(zone_a_capture,nbVies,niveau)
+            draw(0)
+            dep = 6
 
 
             dessiner = False
