@@ -8,7 +8,7 @@ from fltk import *
 from Calculs import *
 from Interface import *
 from random import randint
-from math import sin, cos, pi
+from math import sin, pi
 
 #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
 #   *                                                                   *
@@ -17,7 +17,7 @@ from math import sin, cos, pi
 #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
 
 
-def test_perte(cd_debut, cd_joueur, cd_QIX, cote, lst_joueur) :
+def test_perte(cd_debut: list, cd_joueur: list, cd_QIX: list, cote: float, lst_joueur: list) -> bool :
     """Renvoie True si le joueur rentre dans sa trainée ou si le QIX rentre dans la trainée du joueur. Dans le cas contraire, renvoie False."""
     if cd_debut == cd_joueur :
         return True
@@ -30,7 +30,7 @@ def test_perte(cd_debut, cd_joueur, cd_QIX, cote, lst_joueur) :
     return False
 
 
-def test_sortie_safezone(lst_safezone, cx, cy, dx, dy, dep) :
+def test_sortie_safezone(lst_safezone: list, cx: int, cy: int, dx: int, dy: int, dep: int) -> list :
     """Renvoie les coordonnées du point où le joueur est sorti de la safezone. Si le joueur ne sort pas de la safezone, renvoie une liste vide."""
     for i in range (1,len(lst_safezone)-1) :
 
@@ -54,7 +54,7 @@ def test_sortie_safezone(lst_safezone, cx, cy, dx, dy, dep) :
     return []
 
 
-def test_entree_safezone(lst_safezone, cx, cy) :
+def test_entree_safezone(lst_safezone: list, cx: int, cy: int) -> bool :
     """Renvoie True si le joueur rentre dans la safezone."""
     for i in range (len(lst_safezone)-1) :
         if (encadrement_deux_sens(lst_safezone[i][0],cx,lst_safezone[i+1][0],True,True)) and cy == lst_safezone[i][1] :
@@ -65,7 +65,7 @@ def test_entree_safezone(lst_safezone, cx, cy) :
     return False
 
 
-def test_interieur_safezone(lst_coordonnees, cx, cy) :
+def test_interieur_safezone(lst_coordonnees: list, cx: float, cy: float) -> bool :
     """Test pour savoir si un point est à l'intérieur d'une liste de coordonnées (lst_coordonnees doit être une matrice avec des listes à l'intérieur de taille différentes)"""
     nb = 0
     for i in range (len(lst_coordonnees)) :
@@ -82,9 +82,24 @@ def test_interieur_safezone(lst_coordonnees, cx, cy) :
         return False
     else :
         return True
+    
 
+def creation_obstacles(nb_obstacles: int) -> list :
+    """Crée nb_obstacles obstacles et renvoie la liste avec leurs coordonnées."""
+    lst_obstacles = []
+    nb_cases_abs = (coin_inf_droite[0] - coin_sup_gauche[0]) // 10
+    nb_cases_ord = (coin_inf_droite[1] - coin_sup_gauche[1]) // 10
+    for i in range(nb_obstacles) :
+        obstacle = [randint(2, nb_cases_abs-2), randint(2, nb_cases_ord-2)]
+        while obstacle in lst_obstacles :
+            obstacle = [randint(2, nb_cases_abs-2), randint(2, nb_cases_ord-2)]
+        obstacle[0] = obstacle[0] * 10 + coin_sup_gauche[0]
+        obstacle[1] = obstacle[1] * 10 + coin_sup_gauche[1]
+        lst_obstacles.append(obstacle)
+        carre(lst_obstacles[i][0], lst_obstacles[i][1], 10, "orange", "orange", "obstacles", 1)
+    return lst_obstacles
 
-def mouvement_sparx(cxSparx, cySparx, cw, last) :     
+def mouvement_sparx(cxSparx: float, cySparx: float, cw, last) :   
 
 #           Le code qui suit est très moche (et le Sparx qui tourne dans le sens inverse des aiguilles d'une montre ne fonctionne pas bien,
 #           j'ai des problèmes avec ses déplacements, donc j'ai préféré lui retirer le fait de tenter d'aller dans la zone
@@ -412,6 +427,8 @@ if __name__ == "__main__" :
     coordonnees_debut_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche]
     # Coordonnées au début (ou à la fin) de la safezone uniquement utile pour la fonction debut_egal_fin
 
+    lst_obstacles = creation_obstacles(5)
+    # Coordonnées des obstacles
 
 
     zonemax = aire([[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[800,175],coin_sup_gauche], True)
@@ -425,6 +442,8 @@ if __name__ == "__main__" :
 
     depSparx = 0.75
     # Vitesse de déplacement des Sparx
+
+    obstacle = False
 
 
 
@@ -443,7 +462,6 @@ if __name__ == "__main__" :
 
 
     # Les déplacements seront changés, pas assez aléatoire et le Qix a tendance à ne pas beaucoup bouger d'un endroit
-
 
     while True :
         if a % nb_delai == 0 :
@@ -468,27 +486,27 @@ if __name__ == "__main__" :
                 # voir à modifier le déplacement du qix avec du sin et du pi
                 if x == 1 :
                     if limite_d == "nord" :
-                        dyQIX = max(-depQIX, coin_sup_gauche[1]+5 - cyQIX)                       # Déplacement -> Nord
+                        dyQIX = max(-depQIX, coin_sup_gauche[1]-10 - cyQIX)                       # Déplacement -> Nord
                     if limite_d == "sud" :
-                        dyQIX = min(depQIX, coin_inf_droite[1]-5 - cyQIX)                        # Déplacement -> Sud
+                        dyQIX = min(depQIX, coin_inf_droite[1]+10 - cyQIX)                        # Déplacement -> Sud
                     if limite_d == "est" :
-                        dxQIX = min(depQIX, coin_inf_droite[0]-5 - cxQIX)                        # Déplacement -> Est
+                        dxQIX = min(depQIX, coin_inf_droite[0]+10 - cxQIX)                        # Déplacement -> Est
                     if limite_d == "ouest" :
-                        dxQIX = max(-depQIX, coin_sup_gauche[0]+5 - cxQIX)                       # Déplacement -> Ouest
+                        dxQIX = max(-depQIX, coin_sup_gauche[0]-10 - cxQIX)                       # Déplacement -> Ouest
                 elif x == 2 :
                     if limite_d != "nord" or limite_d == "est" :
-                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]-5 - cxQIX))       # Déplacement -> Nord-Est
-                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1]+5 - cyQIX))
+                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]+10 - cxQIX))       # Déplacement -> Nord-Est
+                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1]-10 - cyQIX))
                     if limite_d == "sud" or limite_d == "ouest" :
-                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0]+5 - cxQIX))      # Déplacement -> Sud-Ouest
-                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1]-5 - cyQIX))
+                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0]-10 - cxQIX))      # Déplacement -> Sud-Ouest
+                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1]+10 - cyQIX))
                 elif x == 3 :
                     if limite_d == "nord" or limite_d == "ouest" :
-                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0]+5 - cxQIX))      # Déplacement -> Nord-Ouest
-                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1]+5 - cyQIX))
+                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0]-10 - cxQIX))      # Déplacement -> Nord-Ouest
+                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1]-10 - cyQIX))
                     if limite_d == "sud" or limite_d == "est" :
-                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]-5 - cxQIX))       # Déplacement -> Sud-Est
-                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1]-5 - cyQIX))
+                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]+10 - cxQIX))       # Déplacement -> Sud-Est
+                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1]+10 - cyQIX))
                 if cxQIX + dxQIX > coin_inf_droite[0] or cxQIX + dxQIX < coin_sup_gauche[0] or cyQIX + dyQIX > coin_inf_droite[1] or cyQIX + dyQIX < coin_sup_gauche[1] :
                     break
                    
@@ -567,7 +585,14 @@ if __name__ == "__main__" :
             cx += dx
             cy += dy
 
-            if dessiner :
+            for e in lst_obstacles :
+                if encadrement_deux_sens(e[0], cx, e[0] + 10) and encadrement_deux_sens(e[1], cy, e[1]+10) :
+                    cx = cx - dx
+                    cy = cy - dy
+                    obstacle = True
+                    break
+
+            if dessiner and not obstacle :
                
                 if coordonnees_debut == [] :  # Test pour savoir si le joueur est sur une bordure
                     coordonnees_debut = test_sortie_safezone(lst_coordonnees_safezone, cx, cy, dx, dy, dep)          # Test pour savoir si le joueur sort d'une bordure
@@ -606,12 +631,14 @@ if __name__ == "__main__" :
 
                         lst_coordonnees_safezone, coordonnees_debut_safezone = debut_egal_fin(lst_coordonnees_safezone, coordonnees_debut_safezone) # Modification des 2 premiers ou derniers éléments de la safezone pour qu'elles soient les mêmes
                         lst_coordonnees_safezone = sommets(lst_coordonnees_safezone)
-                        print(lst_coordonnees_safezone)
 
                         zonetot = ((zonemax - aire(lst_coordonnees_safezone,True)) / zonemax) * 100   # Calcul de l'aire
                         efface("score")
                         score = score + int((aire(lst_coordonnees_safezone,True)*(15-dep))//10000)
                         efface("Trainée")
+                        efface("obstacles")
+                        for e in lst_obstacles :
+                            carre(e[0], e[1], 10, "orange", "orange", "obstacles", 1)
                         efface("Zonecapturee")
                         lst_coordonnees_curseur = []
                         coordonnees_debut = []
@@ -619,7 +646,7 @@ if __name__ == "__main__" :
                         Perdu = False
                         update_act(zonetot, score)
             curseur(cx, cy, rayon)
-
+            obstacle = False
 
 
 
@@ -653,6 +680,8 @@ if __name__ == "__main__" :
             cx, cy = largeurFenetre // 2, coin_inf_droite[1]
             curseur(cx, cy, rayon)
 
+            efface("obstacles")
+            lst_obstacles = creation_obstacles(5)
 
             if niveau%5 == 0 :
                 zone_a_capture += 1
@@ -678,7 +707,6 @@ if __name__ == "__main__" :
             efface("score")
             update_act(zonetot, score)
             update_round(zone_a_capture,nbVies,niveau)
-
 
             efface("ZoneC")
            
