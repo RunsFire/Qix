@@ -11,10 +11,10 @@
 
 ~ Niveaux (un peu présent) : à la fin de chaque niveau, la vitesse des ennemis augmente, et tous les 5 niveaux, il faut capturer 1% de zone totale en plus pour gagner. Pour le reste, nous n'avons pas eu le temps de le faire, mais nous avons des idées de comment faire (par exemple, pour les sparxs, en rajouter un tous les 5 niveaux, dont le sens de déplacement alternera. Cela peut se faire avec, notamment, les dictionnaires (nous n'avons pas pu le faire dans la première phase comme nous ne connaissions pas ce type).
 
-X Bonus : Les bonus ne sont pas présent, encore une fois par manque de temps. Les pommes (3) seront générées aléatoirement dans la zone de jeu, comme dans le jeu Snake. Celles-ci seront représentées par une image de pomme (dans le même style que le coeur symbolisant les vies), avec une hitbox carrée de taille correspondante à l'image affichée. Le temps d'invinsibilité serait géré avec la fonction "sleep" de la librairie 'time', qu'on ajouterait dans une fonction "countdown(temps)".
+X Bonus : Les bonus ne sont pas présents, encore une fois par manque de temps. Les pommes (3) seront générées aléatoirement dans la zone de jeu, comme dans le jeu Snake. Celles-ci seront représentées par une image de pomme (dans le même style que le coeur symbolisant les vies), avec une hitbox carrée de taille correspondante à l'image affichée. Le temps d'invincibilité serait géré avec la fonction "sleep" de la librairie 'time', qu'on ajouterait dans une fonction "countdown(temps)".
 
 X Sparx "internes" : Encore et toujours, cette variante n'a pas été implémentée à cause des délais. Cependant, le fonctionnement de la fonction est déjà posé, il ne reste plus qu'à le coder (voir plus bas pour avoir un descriptif de comment la fonction marcherait).
-        [PS : Pour les sparx, cela est ma faute, j'étais celui qui devait m'en occuper, mais en ayant déjà eu du mal à faire des sparx semi-fonctionnels pour le premier rendu, j'ai préféré m'occuper d'autres éléments que j'étais sûr de savoir faire avant, afin de ne pas perdre trop de temps (alors que celui-ci est déjà très limité). - Romain]
+        [PS : Pour les sparx, cela est de ma faute, j'étais celui qui devait m'en occuper, mais en ayant déjà eu du mal à faire des sparx semi-fonctionnels pour le premier rendu, j'ai préféré m'occuper d'autres éléments que j'étais sûr de savoir faire avant, afin de ne pas perdre trop de temps (alors que celui-ci est déjà très limité). - Romain]
 
 
 ========= Organisation du programme =========
