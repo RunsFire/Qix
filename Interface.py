@@ -1,8 +1,6 @@
 from fltk import *
 import os
 import string
-from Gameplay import zonetot, zone_a_capture, nbVies, niveau, score
-
 
 
 largeurFenetre = 1000           # à modifier pour que
@@ -26,11 +24,10 @@ def carre(x: int, y: int, cote: int, coul="black", remplir=None, nom=None, taill
 
 
 
-def ecran_launch() -> tuple :
+def ecran_launch(zonetot: float, zone_a_capture: float, nbVies: int, niveau: int, score: int) -> tuple :
     """Crée le menu de départ."""
     coin_sup_gauche = [200,180]
     coin_inf_droite = [800,850]
-    cree_fenetre(largeurFenetre, hauteurFenetre)
     rectangle(0,0,largeurFenetre, hauteurFenetre, remplissage = "black")        # Fond
     rectangle(coin_sup_gauche[0], coin_sup_gauche[1], coin_inf_droite[0], coin_inf_droite[1], "white", tag="ZdJ")       # Zone de Jeu
     image(largeurFenetre//2,hauteurFenetre//2, os.path.join(path,'QIX_logo.gif'), ancrage="center", tag="im", largeur=300, hauteur=int(188*(300/414)))      # Logo Qix (start)
@@ -47,19 +44,20 @@ def ecran_launch() -> tuple :
     # * - * = * - * = * - * Score * - * = * - * = * - *
     # - = - = - Taux de capture - = - = -
     ligne(186,129,206,95,"gray",epaisseur="2")
-    #texte(106,113, str(round(zonetot,2)) + " %","white","center", police="Lucida Console",taille=30, tag="Zonecapturee")
-    #texte(260,113, str(zone_a_capture) + "%","gray","center", police="Lucida Console",taille=30, tag="Zone_a_capturee")
+    texte(106,113, str(round(zonetot,2)) + " %","white","center", police="Lucida Console",taille=30, tag="Zonecapturee")
+    texte(260,113, str(zone_a_capture) + "%","gray","center", police="Lucida Console",taille=30, tag="Zone_a_capturee")
     # - = - = - Vies - = - = - 
-    #texte(670,114, str(nbVies), "Violet", "center", police="Lucida Console", taille = 25, tag = "nbVies")
+    texte(670,114, str(nbVies), "Violet", "center", police="Lucida Console", taille = 25, tag = "nbVies")
     image(700,113, os.path.join(path,'heart.gif'), ancrage="center",tag="im")
     # - = - = - Niveau - = - = -
     texte(775,55, "Niveau :","light gray","center", police="Lucida Console",taille=30)
-    #texte(900,55,str(niveau),"light gray","center", police="Lucida Console",taille=30, tag="niveau")
+    texte(900,55,str(niveau),"light gray","center", police="Lucida Console",taille=30, tag="niveau")
     # - = - = - Indications - = - = -
     texte(850,113,"Drawing","red","center", police="Courier",taille=20, tag="dessiner")
     # - = - = - Score - = - = - 
-    texte(106,50, "Score :","white","center", police="Lucida Console",taille=30)
-    #texte(275,50, str(score),"white","center", police="Lucida Console",taille=30, tag="score")
+    if score != None :
+        texte(106,50, "Score :","white","center", police="Lucida Console",taille=30)
+        texte(275,50, str(score),"white","center", police="Lucida Console",taille=30, tag="score")
     return coin_sup_gauche, coin_inf_droite
 
 
@@ -67,7 +65,8 @@ def ecran_launch() -> tuple :
 def update_act(zonetot: float, score: int) -> None:
     '''Mettre à jour les différentes informations qui doivent l'être après chaque action.'''
     texte(106,113, str(round(zonetot,2)) + "%","white","center", police="Lucida Console",taille=30, tag="Zonecapturee")
-    texte(275,50, str(score),"white","center", police="Lucida Console",taille=30, tag="score")
+    if score != None :
+        texte(275,50, str(score),"white","center", police="Lucida Console",taille=30, tag="score")
 
 def update_round(zone_a_capture: int, nbVies: int, niveau: int) -> None:
     '''Mettre à jour les différentes informations qui doivent l'être après chaque niveau.'''
@@ -215,16 +214,15 @@ def menu_principal(largeurFenetre: int, hauteurFenetre: int, path: str) -> str :
                                 efface('oui')
                                 break
                     if tev == "Quitte" :
-                        break
+                        return None
                     elif tev == "Touche" :
                         if touche(ev) == "Escape" :
                             return None
                     mise_a_jour()
-    ferme_fenetre()
 
 
-def menu_variantes(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple :
-    lst_variantes = []
+def menu_variantes(largeurFenetre: int, hauteurFenetre: int, path: str, lst_variantes: list) -> tuple :
+
     rectangle(0,0, largeurFenetre, hauteurFenetre, "black", "black", 1, "bg")
     image(largeurFenetre//2, 125, os.path.join(path,'QIX_logo.gif'), ancrage="center", tag="im", largeur=300, hauteur=int(188*(300/414)))
 
@@ -251,6 +249,22 @@ def menu_variantes(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple
 
     rectangle(largeurFenetre // 2 - 200, hauteurFenetre - 150, largeurFenetre // 2 + 200, hauteurFenetre - 200, "white", epaisseur=2, tag="bouton")
     texte(largeurFenetre // 2, hauteurFenetre - 175, "Menu Principal", "white", "center", taille=24, tag="Principal")
+
+    for variante in lst_variantes :
+        if variante == "Score" :
+            carre(100, 250, 100, "lime", nom="highlight_score")
+        elif variante == "Obstacles" :
+            carre(100, 400, 100, "lime", nom="highlight_obstacles")
+        elif variante == "Sparx" :
+            carre(100, 550, 100, "lime", nom="highlight_sparx")
+        elif variante == "Vitesse" :
+            carre(235, 250, 100, "lime", nom="highlight_vitesse")
+        elif variante == "Bonus" :
+            carre(235, 400, 100, "lime", nom="highlight_bonus")
+        elif variante == "Niveaux" :
+            carre(235, 550, 100, "lime", nom="highlight_niveaux")
+        elif variante == "Joueurs" :
+            carre(370, 250, 100, "lime", nom="highlight_joueurs")
 
     while True :
         ev = donne_ev()
@@ -334,7 +348,6 @@ def menu_variantes(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple
             break
         if touche_pressee("Escape") :
             return "Principal", lst_variantes
-    ferme_fenetre()
     return None, []
 
 
@@ -377,9 +390,8 @@ def menu_parametres(largeurFenetre: int, hauteurFenetre: int, path: str) -> str 
         elif tev == "Touche" :
             if touche(ev) == "Escape" :
                 return "Principal"
-    ferme_fenetre()
 
-def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple :     # 10 variables
+def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_options: list) -> tuple :
     rectangle(0,0, largeurFenetre, hauteurFenetre, "black", "black", 1, "bg")
     image(largeurFenetre//2,125, os.path.join(path,'QIX_logo.gif'), ancrage="center", tag="im", largeur=300, hauteur=int(188*(300/414)))
 
@@ -393,32 +405,32 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple :
     rectangle(75, 300, 275, 350, "white", epaisseur=2, tag="cadre")
     texte(175, 325, "Nombre d'obstacles", "white", "center", taille=15, tag="obstacles")
     rectangle(275, 299, 325, 350, "white", tag="bouton")
-    texte(300, 325, "5", "white", "center", taille=15, tag="nombre_obstacles")
+    texte(300, 325, lst_options[0], "white", "center", taille=15, tag="nombre_obstacles")
 
     rectangle(75, 375, 275, 425, "white", epaisseur=2, tag="cadre")
     texte(175, 400, "Nombre de bonus", "white", "center", taille=15, tag="bonus")
     rectangle(275, 374, 325, 425, "white", tag="bouton")
-    texte(300, 400, "3", "white", "center", taille=15, tag="nombre_pommes")
+    texte(300, 400, lst_options[1], "white", "center", taille=15, tag="nombre_pommes")
 
     rectangle(75, 450, 275, 500, "white", epaisseur=2, tag="cadre")
     texte(175, 475, "Nombre de vies", "white", "center", taille=15, tag="vies")
     rectangle(275, 449, 325, 500, "white", tag="bouton")
-    texte(300, 475, "3", "white", "center", taille=15, tag="nombre_vies")
+    texte(300, 475, lst_options[2], "white", "center", taille=15, tag="nombre_vies")
 
     rectangle(75, 525, 275, 575, "white", epaisseur=2, tag="cadre")
     texte(175, 550, "Niveau initial", "white", "center", taille=15, tag="niveau")
     rectangle(275, 524, 325, 575, "white", tag="bouton")
-    texte(300, 550, "1", "white", "center", taille=13, tag="nb_niveau")
+    texte(300, 550, lst_options[3], "white", "center", taille=13, tag="nb_niveau")
 
     rectangle(75, 600, 275, 650, "white", epaisseur=2, tag="cadre")
-    texte(175, 625, "Vitesse joueur (lent)", "white", "center", taille=14, tag="JoueurSpd(s)")
+    texte(175, 625, "Vitesse joueur (normal)", "white", "center", taille=14, tag="JoueurSpd(n)")
     rectangle(275, 599, 325, 650, "white", tag="bouton")
-    texte(300, 625, "3", "white", "center", taille=15, tag="nombre_JoueurSpd(s)")
+    texte(300, 625, lst_options[4], "white", "center", taille=15, tag="nombre_JoueurSpd(n)")
 
     rectangle(75, 675, 275, 725, "white", epaisseur=2, tag="cadre")
     texte(175, 700, "Vitesse joueur (rapide)", "white", "center", taille=14, tag="JoueurSpd(f)")
     rectangle(275, 674, 325, 725, "white", tag="bouton")
-    texte(300, 700, "6", "white", "center", taille=15, tag="nombre_JoueurSpd(f)")
+    texte(300, 700, lst_options[5], "white", "center", taille=15, tag="nombre_JoueurSpd(f)")
 
 
 
@@ -431,27 +443,27 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple :
     rectangle(375, 300, 575, 350, "white", epaisseur=2, tag="cadre")
     texte(475, 325, "Vitesse du QIX", "white", "center", taille=15, tag="QIXspdI")
     rectangle(575, 299, 625, 350, "white", tag="bouton")
-    texte(600, 325, "1", "white", "center", taille=15, tag="nb_QIXspdI")
+    texte(600, 325, lst_options[6], "white", "center", taille=15, tag="nb_QIXspdI")
 
     rectangle(375, 375, 575, 425, "white", epaisseur=2, tag="cadre")
     texte(475, 400, "Vitesse du Sparx", "white", "center", taille=15, tag="SparxspdI")
     rectangle(575, 374, 625, 425, "white", tag="bouton")
-    texte(600, 400, "0.75", "white", "center", taille=15, tag="nb_SparxspdI")
+    texte(600, 400, lst_options[7], "white", "center", taille=15, tag="nb_SparxspdI")
 
     rectangle(375, 450, 575, 500, "white", epaisseur=2, tag="cadre")
     texte(475, 475, "Zone à capturer", "white", "center", taille=15, tag="zone_a_capturerI")
     rectangle(575, 449, 625, 500, "white", tag="bouton")
-    texte(600, 475, "75 %", "white", "center", taille=14, tag="nb_zone_a_capturerI")
+    texte(600, 475, lst_options[8] + " %", "white", "center", taille=14, tag="nb_zone_a_capturerI")
 
     rectangle(375, 525, 575, 575, "white", epaisseur=2, tag="cadre")
     texte(475, 550, "Taille du QIX", "white", "center", taille=14, tag="tailleQIX")
     rectangle(575, 524, 625, 575, "white", tag="bouton")
-    texte(600, 550, "10", "white", "center", taille=15, tag="nb_tailleQIX")
+    texte(600, 550, lst_options[9], "white", "center", taille=15, tag="nb_tailleQIX")
 
     rectangle(375, 600, 575, 650, "white", epaisseur=2, tag="cadre")
     texte(475, 625, "Taille du Joueur", "white", "center", taille=15, tag="tailleJoueur")
     rectangle(575, 599, 625, 650, "white", tag="bouton")
-    texte(600, 625, "5", "white", "center", taille=15, tag="nb_tailleJoueur")
+    texte(600, 625, lst_options[10], "white", "center", taille=15, tag="nb_tailleJoueur")
 
 
 
@@ -464,28 +476,28 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple :
     rectangle(675, 300, 875, 350, "white", epaisseur=2, tag="cadre")
     texte(775, 325, "Vitesse du QIX", "white", "center", taille=15, tag="QIXspd+")
     rectangle(875, 299, 925, 350, "white", tag="bouton")
-    texte(900, 325, "0.5", "white", "center", taille=15, tag="nb_QIXspd+")
+    texte(900, 325, lst_options[11], "white", "center", taille=15, tag="nb_QIXspd+")
 
     rectangle(675, 375, 875, 425, "white", epaisseur=2, tag="cadre")
     texte(775, 400, "Vitesse du Sparx", "white", "center", taille=15, tag="Sparxspd+")
     rectangle(875, 374, 925, 425, "white", tag="bouton")
-    texte(900, 400, "", "white", "center", taille=15, tag="nb_Sparxspd+")
+    texte(900, 400, lst_options[12], "white", "center", taille=15, tag="nb_Sparxspd+")
 
 
     rectangle(665, 445, 935, 735, "#45FFCA", epaisseur=3, tag="cadre")
     texte(800, 475, "Incrémentation", "#45FFCA", "center", tag="titre")
-    texte(800, 505, "par 5 niveaux", "#45FFCA", "center", tag="titre")
+    texte(800, 505, "par "+ lst_options[13] +" niveaux", "#45FFCA", "center", tag="titre")
     ligne(665, 535, 935, 535, "#45FFCA", 3, "ligne")
 
     rectangle(675, 545, 875, 595, "white", epaisseur=2, tag="cadre")
     texte(775, 570, "Incrémentation par", "white", "center", taille=15, tag="+")
     rectangle(875, 544, 925, 595, "white", tag="bouton")
-    texte(900, 570, "5", "white", "center", taille=15, tag="nb_+")
+    texte(900, 570, lst_options[13], "white", "center", taille=15, tag="nb_+")
 
     rectangle(675, 620, 875, 670, "white", epaisseur=2, tag="cadre")
     texte(775, 645, "Zone à capturer", "white", "center", taille=15, tag="zone_a_capturer+")
     rectangle(875, 619, 925, 670, "white", tag="bouton")
-    texte(900, 645, "1", "white", "center", taille=15, tag="nb_zone_a_capturer+")
+    texte(900, 645, lst_options[14] + " %", "white", "center", taille=15, tag="nb_zone_a_capturer+")
 
 
     rectangle(largeurFenetre // 2 - 200, hauteurFenetre - 100, largeurFenetre // 2 + 200, hauteurFenetre - 150, "white", epaisseur=2, tag="bouton")
@@ -499,204 +511,249 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple :
         efface("rectangle")
         if largeurFenetre // 2 - 200 <= x_souris <= largeurFenetre // 2 + 200 :
             if hauteurFenetre - 150 <= y_souris <= hauteurFenetre - 100 :
-                efface("Parametres")
                 rectangle(largeurFenetre // 2 - 200, hauteurFenetre - 100, largeurFenetre // 2 + 200, hauteurFenetre - 150, "blue", epaisseur=2, tag="rectangle")
-                texte(largeurFenetre // 2, hauteurFenetre - 125, "Paramètres", "white", "center", taille=24, tag="Parametres")
                 if tev == "ClicGauche" :
-                    return "Parametres"
+                    return "Parametres", lst_options
         if 275 <= x_souris <= 325 :
             if 299 <= y_souris <= 350 :
                 rectangle(275, 299, 325, 350, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nombre_obstacles")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_obstacles = entree
-                        texte(300, 325, nb_obstacles, "white", "center", taille=15, tag="nombre_obstacles")
-                    else :
-                        texte(300, 325, "5", "white", "center", taille=15, tag="nombre_obstacles")
+                        lst_options[0] = entree
+                    texte(300, 325, lst_options[0], "white", "center", taille=15, tag="nombre_obstacles")
             elif 374 <= y_souris <= 425 :
                 rectangle(275, 374, 325, 425, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nombre_pommes")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_pommes = entree
-                        texte(300, 400, nb_pommes, "white", "center", taille=15, tag="nombre_pommes")
-                    else :
-                        texte(300, 400, 3, "white", "center", taille=15, tag="nombre_pommes")
+                        lst_options[1] = entree
+                    texte(300, 400, lst_options[1], "white", "center", taille=15, tag="nombre_pommes")
             elif 449 <= y_souris <= 500 :
                 rectangle(275, 449, 325, 500, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nombre_vies")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_vies = entree
-                        texte(300, 475, nb_vies, "white", "center", taille=15, tag="nombre_vies")
-                    else :
-                        texte(300, 475, 3, "white", "center", taille=15, tag="nombre_vies")
+                        lst_options[2] = entree
+                    texte(300, 475, lst_options[2], "white", "center", taille=15, tag="nombre_vies")
             elif 524 <= y_souris <= 575 :
                 rectangle(275, 524, 325, 575, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_niveau")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_niveau = entree
-                        texte(300, 550, nb_niveau, "white", "center", taille=15, tag="nb_niveau")
-                    else :
-                        texte(300, 550, "1", "white", "center", taille=15, tag="nb_niveau")
+                        lst_options[3] = entree
+                    texte(300, 550, lst_options[3], "white", "center", taille=15, tag="nb_niveau")
             elif 599 <= y_souris <= 650 :
                 rectangle(275, 599, 325, 650, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
-                    efface("nombre_JoueurSpd(s)")
-                    entree = input(False)
+                    efface("nombre_JoueurSpd(n)")
+                    entree = input(True)
                     if entree != "" :
-                        nb_JoueurSpd_s = entree
-                        texte(300, 625, nb_JoueurSpd_s, "white", "center", taille=15, tag="nombre_JoueurSpd(s)")
-                    else :
-                        texte(300, 625, "3", "white", "center", taille=15, tag="nombre_JoueurSpd(s)")
+                        lst_options[4] = entree
+                    texte(300, 625, lst_options[4], "white", "center", taille=15, tag="nombre_JoueurSpd(n)")
             elif 674 <= y_souris <= 725 :
                 rectangle(275, 674, 325, 725, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nombre_JoueurSpd(f)")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_JoueurSpd_f = entree
-                        texte(300, 700, nb_JoueurSpd_f, "white", "center", taille=15, tag="nombre_JoueurSpd(f)")
-                    else :
-                        texte(300, 700, "6", "white", "center", taille=15, tag="nombre_JoueurSpd(f)")
+                        lst_options[5] = entree
+                    texte(300, 700, lst_options[5], "white", "center", taille=15, tag="nombre_JoueurSpd(f)")
         elif 575 <= x_souris <= 625 :
             if 299 <= y_souris <= 350 :
                 rectangle(575, 299, 625, 350, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_QIXspdI")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_QIXspdI = entree
-                        texte(600, 325, nb_QIXspdI, "white", "center", taille=15, tag="nb_QIXspdI")
-                    else :
-                        texte(600, 325, "1", "white", "center", taille=15, tag="nb_QIXspdI")
+                        lst_options[6] = entree
+                    texte(600, 325, lst_options[6], "white", "center", taille=15, tag="nb_QIXspdI")
             elif 374 <= y_souris <= 425 :
                 rectangle(575, 374, 625, 425, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_SparxspdI")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_SparxspdI = entree
-                        texte(600, 400, nb_SparxspdI, "white", "center", taille=15, tag="nb_SparxspdI")
-                    else :
-                        texte(600, 400, "0.75", "white", "center", taille=15, tag="nb_SparxspdI")
+                        lst_options[7] = entree
+                    texte(600, 400, lst_options[7], "white", "center", taille=15, tag="nb_SparxspdI")
             elif 449 <= y_souris <= 500 :
                 rectangle(575, 449, 625, 500, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_zone_a_capturerI")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_zone_a_capturerI = entree
-                        texte(600, 475, nb_zone_a_capturerI + " %", "white", "center", taille=13, tag="nb_zone_a_capturerI")
-                    else :
-                        texte(600, 475, "75 %", "white", "center", taille=13, tag="nb_zone_a_capturerI")
+                        lst_options[8] = entree
+                    texte(600, 475, lst_options[8] + " %", "white", "center", taille=13, tag="nb_zone_a_capturerI")
             elif 524 <= y_souris <= 575 :
                 rectangle(575, 524, 625, 575, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_tailleQIX")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_tailleQIX = entree
-                        texte(600, 550, nb_tailleQIX, "white", "center", taille=15, tag="nb_tailleQIX")
-                    else :
-                        texte(600, 550, "10", "white", "center", taille=15, tag="nb_tailleQIX")
+                        lst_options[9] = entree
+                    texte(600, 550, lst_options[9], "white", "center", taille=15, tag="nb_tailleQIX")
             elif 599 <= y_souris <= 650 :
                 rectangle(575, 599, 625, 650, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_tailleJoueur")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_tailleJoueur = entree
-                        texte(600, 625, nb_tailleJoueur, "white", "center", taille=15, tag="nb_tailleJoueur")
-                    else :
-                        texte(600, 625, "5", "white", "center", taille=15, tag="nb_tailleJoueur")
+                        lst_options[10] = entree
+                    texte(600, 625, lst_options[10], "white", "center", taille=15, tag="nb_tailleJoueur")
         elif 875 <= x_souris <= 925 :
             if 299 <= y_souris <= 350 :
                 rectangle(875, 299, 925, 350, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_QIXspd+")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_QIXspdP = entree
-                        texte(900, 325, nb_QIXspdP, "white", "center", taille=15, tag="nb_QIXspd+")
-                    else :
-                        texte(900, 325, "0.5", "white", "center", taille=15, tag="nb_QIXspd+")
+                        lst_options[11] = entree
+                    texte(900, 325, lst_options[11], "white", "center", taille=15, tag="nb_QIXspd+")
             elif 374 <= y_souris <= 425 :
                 rectangle(875, 374, 925, 425, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_Sparxspd+")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_SparxspdP = entree
-                        texte(900, 400, nb_SparxspdP, "white", "center", taille=15, tag="nb_Sparxspd+")
-                    else :
-                        texte(900, 400, "", "white", "center", taille=15, tag="nb_Sparxspd+")
+                        lst_options[12] = entree
+                    texte(900, 400, lst_options[12], "white", "center", taille=15, tag="nb_Sparxspd+")
             elif 544 <= y_souris <= 595 :
                 rectangle(875, 544, 925, 595, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
-                    efface("+")
-                    entree = input(False)
+                    efface("nb_+")
+                    entree = input(True)
                     if entree != "" :
-                        P = entree
-                        texte(900, 570, P, "white", "center", taille=15, tag="nb_+")
-                    else :
-                        texte(900, 570, "5", "white", "center", taille=15, tag="nb_+")
+                        lst_options[13] = entree
+                    texte(900, 570, lst_options[13], "white", "center", taille=15, tag="nb_+")
             elif 619 <= y_souris <= 670 :
                 rectangle(875, 619, 925, 670, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_zone_a_capturer+")
-                    entree = input(False)
+                    entree = input(True)
                     if entree != "" :
-                        nb_zone_a_capturerP = entree
-                        texte(900, 645, nb_zone_a_capturerP, "white", "center", taille=15, tag="nb_zone_a_capturer+")
-                    else :
-                        texte(900, 645, "1", "white", "center", taille=15, tag="nb_zone_a_capturer+")
+                        lst_options[14] = entree
+                    texte(900, 645, lst_options[14] + " %", "white", "center", taille=15, tag="nb_zone_a_capturer+")
         mise_a_jour()
         if tev == "Quitte" :
             break
         elif tev == "Touche" :
             if touche(ev) == "Escape" :
-                return "Parametres"
-    ferme_fenetre()
+                return "Parametres", lst_options
+    return None, lst_options
 
-def input(lettre = False) -> str :
-    """lettre est un bouléen qui permet d'activer les lettres ou les chiffres dans le mot renvoyé"""
-    mot = ""
+def input(nombre: bool) -> str :
+    """nombre est un bouléen qui permet d'activer uniquement les chiffres dans le mot renvoyé"""
+    texte = ""
     while True :
         ev = donne_ev()
         tev = type_ev(ev)
         if tev == "Touche" :
             nom_touche = touche(ev)
-            if lettre :
-                if nom_touche in string.ascii_letters :
-                    mot = mot + nom_touche.upper()
+            if nom_touche == "Escape" :
+                return ""
+            elif not nombre :
+                return nom_touche
             else :
                 if nom_touche in string.digits :
-                    mot = mot + nom_touche
+                    texte = texte + nom_touche
                 elif nom_touche == "period" :
-                    mot = mot + "."
-            if nom_touche == "Return" or nom_touche == "Escape" :
-                break
+                    texte = texte + "."
+                elif nom_touche == "Return" : 
+                    if texte[-1] == "." :
+                        texte = texte[:-1]
+                    break
+        elif tev == "Quitte" :
+            ferme_fenetre()
         mise_a_jour()
-        if tev == "Quitte" :
-            break
-    return mot
+    return texte
 
-def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple :
+def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touches: list) -> tuple :
     rectangle(0,0, largeurFenetre, hauteurFenetre, "black", "black", 1, "bg")
     image(largeurFenetre//2,125, os.path.join(path,'QIX_logo.gif'), ancrage="center", tag="im", largeur=300, hauteur=int(188*(300/414)))
-    rectangle(largeurFenetre // 2 - 200, 250, largeurFenetre // 2 + 200, 300, "white", epaisseur=2, tag="bouton")
-    texte(largeurFenetre // 2, 275, "Options des ennemis", "white", "center", taille=24, tag="options")
-    rectangle(largeurFenetre // 2 - 200, 325, largeurFenetre // 2 + 200, 375, "white", epaisseur=2, tag="bouton")
-    texte(largeurFenetre // 2, 350, "Touches", "white", "center", taille=24, tag="touches")
-    rectangle(largeurFenetre // 2 - 200, hauteurFenetre - 150, largeurFenetre // 2 + 200, hauteurFenetre - 200, "white", epaisseur=2, tag="bouton")
-    texte(largeurFenetre // 2, hauteurFenetre - 175, "Paramètres", "white", "center", taille=24, tag="Parametres")
+
+    entree = ""
+
+    rectangle(65, 200, 335, 735, "#45FFCA", epaisseur=3, tag="cadre")
+    texte(200, 245, "Joueur 1", "#45FFCA", "center", tag="titre")
+    ligne(65, 290, 335, 290, "#45FFCA", 3, "ligne")
+
+
+    rectangle(75, 300, 275, 350, "white", epaisseur=2, tag="cadre")
+    texte(175, 325, "Monter", "white", "center", taille=15, tag="monter")
+    rectangle(275, 299, 325, 350, "white", tag="bouton")
+    texte(300, 325, lst_touches[0], "white", "center", taille=15, tag="touche_monter1")
+
+    rectangle(75, 375, 275, 425, "white", epaisseur=2, tag="cadre")
+    texte(175, 400, "A gauche", "white", "center", taille=15, tag="gauche")
+    rectangle(275, 374, 325, 425, "white", tag="bouton")
+    texte(300, 400, lst_touches[1], "white", "center", taille=15, tag="touche_gauche1")
+
+    rectangle(75, 450, 275, 500, "white", epaisseur=2, tag="cadre")
+    texte(175, 475, "Descendre", "white", "center", taille=15, tag="descendre")
+    rectangle(275, 449, 325, 500, "white", tag="bouton")
+    texte(300, 475, lst_touches[2], "white", "center", taille=15, tag="touche_descendre1")
+
+    rectangle(75, 525, 275, 575, "white", epaisseur=2, tag="cadre")
+    texte(175, 550, "A droite", "white", "center", taille=15, tag="droite")
+    rectangle(275, 524, 325, 575, "white", tag="bouton")
+    texte(300, 550, lst_touches[3], "white", "center", taille=13, tag="touche_droite1")
+
+    rectangle(75, 600, 275, 650, "white", epaisseur=2, tag="cadre")
+    texte(175, 625, "Vitesse normale", "white", "center", taille=14, tag="spd(n)1")
+    rectangle(275, 599, 325, 650, "white", tag="bouton")
+    texte(300, 625, lst_touches[4], "white", "center", taille=15, tag="touche_spd(n)1")
+
+    rectangle(75, 675, 275, 725, "white", epaisseur=2, tag="cadre")
+    texte(175, 700, "Vitesse rapide", "white", "center", taille=14, tag="spd(f)1")
+    rectangle(275, 674, 325, 725, "white", tag="bouton")
+    texte(300, 700, lst_touches[5], "white", "center", taille=15, tag="touche_spd(f)1")
+
+
+
+
+    rectangle(365, 200, 635, 735, "#45FFCA", epaisseur=3, tag="cadre")
+    texte(500, 245, "Joueur 2", "#45FFCA", "center", tag="titre")
+    ligne(365, 290, 635, 290, "#45FFCA", 3, "ligne")
+
+
+    rectangle(375, 300, 575, 350, "white", epaisseur=2, tag="cadre")
+    texte(475, 325, "Monter", "white", "center", taille=15, tag="monter2")
+    rectangle(575, 299, 625, 350, "white", tag="bouton")
+    texte(600, 325, lst_touches[6], "white", "center", taille=15, tag="touche_monter2")
+
+    rectangle(375, 375, 575, 425, "white", epaisseur=2, tag="cadre")
+    texte(475, 400, "A gauche", "white", "center", taille=15, tag="gauche2")
+    rectangle(575, 374, 625, 425, "white", tag="bouton")
+    texte(600, 400, lst_touches[7], "white", "center", taille=15, tag="touche_gauche2")
+
+    rectangle(375, 450, 575, 500, "white", epaisseur=2, tag="cadre")
+    texte(475, 475, "Descendre", "white", "center", taille=15, tag="descendre2")
+    rectangle(575, 449, 625, 500, "white", tag="bouton")
+    texte(600, 475, lst_touches[8], "white", "center", taille=14, tag="touche_descendre2")
+
+    rectangle(375, 525, 575, 575, "white", epaisseur=2, tag="cadre")
+    texte(475, 550, "A droite", "white", "center", taille=14, tag="droite2")
+    rectangle(575, 524, 625, 575, "white", tag="bouton")
+    texte(600, 550, lst_touches[9], "white", "center", taille=15, tag="touche_droite2")
+
+    rectangle(375, 600, 575, 650, "white", epaisseur=2, tag="cadre")
+    texte(475, 625, "Vitesse normale", "white", "center", taille=15, tag="spd(n)2")
+    rectangle(575, 599, 625, 650, "white", tag="bouton")
+    texte(600, 625, lst_touches[10], "white", "center", taille=15, tag="touche_spd(n)2")
+
+    rectangle(375, 675, 575, 725, "white", epaisseur=2, tag="cadre")
+    texte(475, 700, "Vitesse rapide", "white", "center", taille=14, tag="spd(f)2")
+    rectangle(575, 674, 625, 725, "white", tag="bouton")
+    texte(600, 700, lst_touches[11], "white", "center", taille=15, tag="touche_spd(f)2")
+
+
+    rectangle(largeurFenetre // 2 - 200, hauteurFenetre - 100, largeurFenetre // 2 + 200, hauteurFenetre - 150, "white", epaisseur=2, tag="bouton")
+    texte(largeurFenetre // 2, hauteurFenetre - 125, "Paramètres", "white", "center", taille=24, tag="Parametres")
+    
     while True :
         ev = donne_ev()
         tev = type_ev(ev)
@@ -704,42 +761,129 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str) -> tuple :
         y_souris = ordonnee_souris()
         efface("rectangle")
         if largeurFenetre // 2 - 200 <= x_souris <= largeurFenetre // 2 + 200 :
-            if 250 <= y_souris <= 300 :
-                efface("options")
-                rectangle(largeurFenetre // 2 - 200, 250,largeurFenetre // 2 + 200, 300, "blue", epaisseur=2, tag="rectangle")
-                texte(largeurFenetre // 2, 275, "Options des ennemis", "white", "center", taille=24, tag="options")
+            if hauteurFenetre - 150 <= y_souris <= hauteurFenetre - 100 :
+                rectangle(largeurFenetre // 2 - 200, hauteurFenetre - 100, largeurFenetre // 2 + 200, hauteurFenetre - 150, "blue", epaisseur=2, tag="rectangle")
                 if tev == "ClicGauche" :
-                    return "Options"
-            elif 325 <= y_souris <= 375 :
-                efface("touches")
-                rectangle(largeurFenetre // 2 - 200, 325,largeurFenetre // 2 + 200, 375, "blue", epaisseur=2, tag="rectangle")
-                texte(largeurFenetre // 2, 350, "Touches", "white", "center", taille=24, tag="touches")
+                    return "Parametres", lst_touches
+        if 275 <= x_souris <= 325 :
+            if 299 <= y_souris <= 350 :
+                rectangle(275, 299, 325, 350, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
-                    return "Touches"
-            if hauteurFenetre - 200 <= y_souris <= hauteurFenetre - 150 :
-                efface("Parametres")
-                rectangle(largeurFenetre // 2 - 200, hauteurFenetre - 150, largeurFenetre // 2 + 200, hauteurFenetre - 200, "blue", epaisseur=2, tag="rectangle")
-                texte(largeurFenetre // 2, hauteurFenetre - 175, "Paramètres", "white", "center", taille=24, tag="Parametres")
+                    efface("touche_monter1")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[0] = entree
+                    texte(300, 325, lst_touches[0], "white", "center", taille=15, tag="touche_monter1")
+            elif 374 <= y_souris <= 425 :
+                rectangle(275, 374, 325, 425, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
-                    return "Parametres"
+                    efface("touche_gauche1")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[1] = entree
+                    texte(300, 400, lst_touches[1], "white", "center", taille=15, tag="touche_gauche1")
+            elif 449 <= y_souris <= 500 :
+                rectangle(275, 449, 325, 500, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_descendre1")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[2] = entree
+                    texte(300, 475, lst_touches[2], "white", "center", taille=15, tag="touche_descendre1")
+            elif 524 <= y_souris <= 575 :
+                rectangle(275, 524, 325, 575, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_droite1")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[3] = entree
+                    texte(300, 550, lst_touches[3], "white", "center", taille=15, tag="touche_droite1")
+            elif 599 <= y_souris <= 650 :
+                rectangle(275, 599, 325, 650, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_spd(n)1")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[4] = entree
+                    texte(300, 625, lst_touches[4], "white", "center", taille=15, tag="touche_spd(n)1")
+            elif 674 <= y_souris <= 725 :
+                rectangle(275, 674, 325, 725, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_spd(f)1")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[5] = entree
+                    texte(300, 700, lst_touches[5], "white", "center", taille=15, tag="touche_spd(f)1")
+        elif 575 <= x_souris <= 625 :
+            if 299 <= y_souris <= 350 :
+                rectangle(575, 299, 625, 350, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_monter2")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[6] = entree
+                    texte(600, 325, lst_touches[6], "white", "center", taille=15, tag="touche_monter2")
+            elif 374 <= y_souris <= 425 :
+                rectangle(575, 374, 625, 425, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_gauche2")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[7] = entree
+                    texte(600, 400, lst_touches[7], "white", "center", taille=15, tag="touche_gauche2")
+            elif 449 <= y_souris <= 500 :
+                rectangle(575, 449, 625, 500, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_descendre2")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[8] = entree
+                    texte(600, 475, lst_touches[8], "white", "center", taille=13, tag="touche_descendre2")
+            elif 524 <= y_souris <= 575 :
+                rectangle(575, 524, 625, 575, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_droite2")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[9] = entree
+                    texte(600, 550, lst_touches[9], "white", "center", taille=13, tag="touche_droite2")
+            elif 599 <= y_souris <= 650 :
+                rectangle(575, 599, 625, 650, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_spd(n)2")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[10] = entree
+                    texte(600, 625, lst_touches[10], "white", "center", taille=15, tag="touche_spd(n)2")
+            elif 674 <= y_souris <= 725 :
+                rectangle(575, 674, 625, 725, "blue", tag="rectangle")
+                if tev == "ClicGauche" :
+                    efface("touche_spd(f)2")
+                    entree = input(False)
+                    if entree != "" :
+                        lst_touches[11] = entree
+                    texte(600, 625, lst_touches[11], "white", "center", taille=15, tag="touche_spd(f)2")
         
         mise_a_jour()
         if tev == "Quitte" :
             break
         elif tev == "Touche" :
             if touche(ev) == "Escape" :
-                return "Parametres"
-    ferme_fenetre()
+                return "Parametres", lst_touches
+    return None, lst_touches
 
 if __name__ == "__main__" :
     cree_fenetre(largeurFenetre, hauteurFenetre)
+    lst_variantes = []
+    lst_options = ["5", "3", "3", "1", "5", "10", "1", "0.75", "75", "10", "10", "0.25", "0.125", "5", "1"]
+    lst_touches = ["Up", "Left", "Down", "Right", "Ctrl_R", "Return", "z", "q", "s", "d", "a", "Shift_L"]
     variable = menu_principal(largeurFenetre, hauteurFenetre, path)
     while variable != None :
         efface_tout()
         if variable == "Principal" :
             variable = menu_principal(largeurFenetre, hauteurFenetre, path)
         elif variable == "Variantes" :
-            variable, lst_variantes = menu_variantes(largeurFenetre, hauteurFenetre, path)
+            variable, lst_variantes = menu_variantes(largeurFenetre, hauteurFenetre, path, lst_variantes)
             print(lst_variantes)
         elif variable == "Parametres" :
             while variable != None and variable != "Principal" :
@@ -747,8 +891,8 @@ if __name__ == "__main__" :
                 if variable == "Parametres" :
                     variable = menu_parametres(largeurFenetre, hauteurFenetre, path)
                 elif variable == "Options" :
-                    variable = menu_options(largeurFenetre, hauteurFenetre, path)
+                    variable, lst_options = menu_options(largeurFenetre, hauteurFenetre, path, lst_options)
                 elif variable == "Touches" :
-                    variable = menu_touches(largeurFenetre, hauteurFenetre, path)
+                    variable, lst_touches = menu_touches(largeurFenetre, hauteurFenetre, path, lst_touches)
         elif variable == "Commencer" :
             break
