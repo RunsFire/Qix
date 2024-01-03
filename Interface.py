@@ -536,7 +536,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                 if tev == "ClicGauche" :
                     efface("nombre_vies")
                     entree = input(True)
-                    if entree != "" :
+                    if entree != "" and entree > "0" and ("." not in entree) :
                         lst_options[2] = entree
                     texte(300, 475, lst_options[2], "white", "center", taille=15, tag="nombre_vies")
             elif 524 <= y_souris <= 575 :
@@ -544,7 +544,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                 if tev == "ClicGauche" :
                     efface("nb_niveau")
                     entree = input(True)
-                    if entree != "" :
+                    if entree != "" and entree > "0" and ("." not in entree) :
                         lst_options[3] = entree
                     texte(300, 550, lst_options[3], "white", "center", taille=15, tag="nb_niveau")
             elif 599 <= y_souris <= 650 :
@@ -585,7 +585,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                 if tev == "ClicGauche" :
                     efface("nb_zone_a_capturerI")
                     entree = input(True)
-                    if entree != "" :
+                    if entree != "" and entree > "0" and entree < "100" :
                         lst_options[8] = entree
                     texte(600, 475, lst_options[8] + " %", "white", "center", taille=13, tag="nb_zone_a_capturerI")
             elif 524 <= y_souris <= 575 :
@@ -626,7 +626,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                 if tev == "ClicGauche" :
                     efface("nb_+")
                     entree = input(True)
-                    if entree != "" :
+                    if entree != "" and entree > "0" :
                         lst_options[13] = entree
                     texte(900, 570, lst_options[13], "white", "center", taille=15, tag="nb_+")
             elif 619 <= y_souris <= 670 :
@@ -771,7 +771,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_monter1")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[0] = entree
                     texte(300, 325, lst_touches[0], "white", "center", taille=15, tag="touche_monter1")
             elif 374 <= y_souris <= 425 :
@@ -779,7 +779,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_gauche1")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[1] = entree
                     texte(300, 400, lst_touches[1], "white", "center", taille=15, tag="touche_gauche1")
             elif 449 <= y_souris <= 500 :
@@ -787,7 +787,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_descendre1")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[2] = entree
                     texte(300, 475, lst_touches[2], "white", "center", taille=15, tag="touche_descendre1")
             elif 524 <= y_souris <= 575 :
@@ -795,7 +795,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_droite1")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[3] = entree
                     texte(300, 550, lst_touches[3], "white", "center", taille=15, tag="touche_droite1")
             elif 599 <= y_souris <= 650 :
@@ -803,7 +803,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_spd(n)1")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[4] = entree
                     texte(300, 625, lst_touches[4], "white", "center", taille=15, tag="touche_spd(n)1")
             elif 674 <= y_souris <= 725 :
@@ -811,7 +811,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_spd(f)1")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[5] = entree
                     texte(300, 700, lst_touches[5], "white", "center", taille=15, tag="touche_spd(f)1")
         elif 575 <= x_souris <= 625 :
@@ -820,7 +820,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_monter2")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[6] = entree
                     texte(600, 325, lst_touches[6], "white", "center", taille=15, tag="touche_monter2")
             elif 374 <= y_souris <= 425 :
@@ -828,7 +828,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_gauche2")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[7] = entree
                     texte(600, 400, lst_touches[7], "white", "center", taille=15, tag="touche_gauche2")
             elif 449 <= y_souris <= 500 :
@@ -836,7 +836,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_descendre2")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[8] = entree
                     texte(600, 475, lst_touches[8], "white", "center", taille=13, tag="touche_descendre2")
             elif 524 <= y_souris <= 575 :
@@ -844,7 +844,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_droite2")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[9] = entree
                     texte(600, 550, lst_touches[9], "white", "center", taille=13, tag="touche_droite2")
             elif 599 <= y_souris <= 650 :
@@ -852,7 +852,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_spd(n)2")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[10] = entree
                     texte(600, 625, lst_touches[10], "white", "center", taille=15, tag="touche_spd(n)2")
             elif 674 <= y_souris <= 725 :
@@ -860,7 +860,7 @@ def menu_touches(largeurFenetre: int, hauteurFenetre: int, path: str, lst_touche
                 if tev == "ClicGauche" :
                     efface("touche_spd(f)2")
                     entree = input(False)
-                    if entree != "" :
+                    if entree != "" and entree not in lst_touches :
                         lst_touches[11] = entree
                     texte(600, 625, lst_touches[11], "white", "center", taille=15, tag="touche_spd(f)2")
         
