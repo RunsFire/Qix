@@ -18,7 +18,7 @@ Des Sparxs sont également ajoutés.
 
 ~ Bonus : Les bonus ne sont pas présents, encore une fois par manque de temps. Les pommes (3) seront générées aléatoirement dans la zone de jeu, comme dans le jeu Snake. 
 Celles-ci seront représentées par une image de pomme (dans le même style que le coeur symbolisant les vies), avec une hitbox carrée de taille correspondante à l'image 
-affichée. Le temps d'invincibilité serait géré avec le module 'time'.
+affichée. Le temps d'invinsibilité est géré avec le module "time".
 
 X Sparx ("internes") : Malgré le temps passé sur ceux-ci, les sparx ne sont toujours pas fonctionnel (du moins pour le rendu, j'espère pouvoir régler le problème d'ici la 
 soutenance, mais je ne promet rien). La cause de leur disfonctionnement a été repéré (cela provient des polygones formées, plus précisément de leurs coordonnées) et nous 
