@@ -585,7 +585,8 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                 if tev == "ClicGauche" :
                     efface("nb_zone_a_capturerI")
                     entree = input(True)
-                    if entree != "" and entree > "0" and entree < "100" :
+                    print(entree, float(entree) > 0, float(entree) < 100)
+                    if entree != "" and float(entree) > 0 and float(entree) < 100 :
                         lst_options[8] = entree
                     texte(600, 475, lst_options[8] + " %", "white", "center", taille=13, tag="nb_zone_a_capturerI")
             elif 524 <= y_souris <= 575 :
@@ -626,7 +627,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                 if tev == "ClicGauche" :
                     efface("nb_+")
                     entree = input(True)
-                    if entree != "" and entree > "0" :
+                    if entree != "" and float(entree) > 0 :
                         lst_options[13] = entree
                     texte(900, 570, lst_options[13], "white", "center", taille=15, tag="nb_+")
             elif 619 <= y_souris <= 670 :
