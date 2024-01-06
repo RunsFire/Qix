@@ -5,6 +5,8 @@ import doctest
 
 def aire(lst: list, positif=True) -> list :                # Pas 100% sur que ça marche toujours
     """ Renvoie l'aire d'un polygone ayant pour sommet (x,y) dans une liste lst. positif est un booleen qui permet de laisser ou pas une aire négative en retour.
+    :param list lst: matrice de coordonnées du polygone
+    :param bool positif: booléen pour avoir un nombre positif à la fin (défaut True)
     >>> aire([[2,2],[4,2],[4,4],[2,4]],True)
     4.0
     >>> aire([[4,2],[2,2],[2,4],[4,4],[4,2],[2,2]],False)
@@ -19,8 +21,6 @@ def aire(lst: list, positif=True) -> list :                # Pas 100% sur que ç
     0.0
     >>> aire([[0,0],[2,0],[2,2],[1,2],[1,3],[3,3],[3,2],[4,2],[4,4],[0,4]],True)
     10.0
-    :param list lst: matrice de coordonnées du polygone
-    :param bool positif: booléen pour avoir un nombre positif à la fin
     """
     assert lst != []
     aire = 0
@@ -87,6 +87,11 @@ def sommets(lst: list) -> list :
 
 def encadrement(element1: float, element2: float, element3: float, egal1=True, egal2=True) -> bool :
     """Renvoie True si l'element2 est compris entre l'element1 et l'element3. egal est un bouléen qui rajoute l'égalité si besoin.
+    :param float element1: premier élément à encadrer
+    :param float element2: élément à encadrer
+    :param float element3: dernier élément à encadrer
+    :param bool egal1: ajoute l'égalité à la première opération (défaut True)
+    :param bool egal2: ajoute l'égalité à la seconde opération (défaut True)
     >>> encadrement(2,2,2,True,True)
     True
     >>> encadrement(2,2,2,False,True)
@@ -95,11 +100,6 @@ def encadrement(element1: float, element2: float, element3: float, egal1=True, e
     True
     >>> encadrement(2,2,3,True,False)
     True
-    :param float element1: premier élément à encadrer
-    :param float element2: élément à encadrer
-    :param float element3: dernier élément à encadrer
-    :param bool egal1: ajoute l'égalité à la première opération (défaut True)
-    :param bool egal2: ajoute l'égalité à la seconde opération (défaut True)
     """
     if egal1 == True :
             if egal2 == True :
