@@ -9,12 +9,11 @@
 
 - Vitesse : en appuyant sur une touche (dépendante du joueur), le joueur a possibilité de changer de vitesse de déplacement. Une vitesse plus lente permet d'obtenir un score plus élevé. De plus, il n'est possible de changer de vitesse que lorsque le joueur se trouve sur un trait déjà construit (bordure ou polygone).
 
-~ Niveaux (un peu présent) : à la fin de chaque niveau, la vitesse des ennemis augmente, et tous les 5 niveaux, il faut capturer 1% de zone totale en plus pour gagner. Pour le reste, nous n'avons pas eu le temps de le faire, mais nous avons des idées de comment faire (par exemple, pour les sparxs, en rajouter un tous les 5 niveaux, dont le sens de déplacement alternera. Cela peut se faire avec, notamment, les dictionnaires (nous n'avons pas pu le faire dans la première phase comme nous ne connaissions pas ce type).
+- Niveaux : à la fin de chaque niveau, la vitesse des ennemis augmente, et tous les X niveaux (modifiable), il faut capturer X% de zone totale en plus pour gagner. Des Sparxs sont également ajoutés.
 
-X Bonus : Les bonus ne sont pas présents, encore une fois par manque de temps. Les pommes (3) seront générées aléatoirement dans la zone de jeu, comme dans le jeu Snake. Celles-ci seront représentées par une image de pomme (dans le même style que le coeur symbolisant les vies), avec une hitbox carrée de taille correspondante à l'image affichée. Le temps d'invincibilité serait géré avec le module 'time'.
+~ Bonus : Les bonus ne sont pas présents, encore une fois par manque de temps. Les pommes (3) seront générées aléatoirement dans la zone de jeu, comme dans le jeu Snake. Celles-ci seront représentées par une image de pomme (dans le même style que le coeur symbolisant les vies), avec une hitbox carrée de taille correspondante à l'image affichée. Le temps d'invincibilité serait géré avec le module 'time'.
 
-X Sparx "internes" : Encore et toujours, cette variante n'a pas été implémentée à cause des délais. Cependant, le fonctionnement de la fonction est déjà posé, il ne reste plus qu'à le coder (voir plus bas pour avoir un descriptif de comment la fonction marcherait).
-        [PS : Pour les sparx, cela est de ma faute, j'étais celui qui devait m'en occuper, mais en ayant déjà eu du mal à faire des sparx semi-fonctionnels pour le premier rendu, j'ai préféré m'occuper d'autres éléments que j'étais sûr de savoir faire avant, afin de ne pas perdre trop de temps (alors que celui-ci est déjà très limité). - Romain]
+X Sparx ("internes") : Malgré le temps passé sur ceux-ci, les sparx ne sont toujours pas fonctionnel (du moins pour le rendu, j'espère pouvoir régler le problème d'ici la soutenance, mais je ne promet rien). La cause de leur disfonctionnement a été repéré (cela provient des polygones formées, plus précisément de leurs coordonnées) et nous pensons avoir trouver d'où vient le problème (fonction de concatenation). Cependant, nous n'avons pas eu le temps de localiser précisément la source du problème dans le code pour le régler.
 
 
 ========= Organisation du programme =========
@@ -39,12 +38,12 @@ Les coordonnées de la safezone qui sont supprimées doivent être renversées c
 
 > La fonction debut_egal_fin n'est utile que pour les extrémités du polygone car, sans cette fonction, il faudrait rajouter, à chaque fonction utilisant l'index i+1 à la safezone, la condition qui vérifie si l'index == len((liste) - 1) ce qui doublerait la taille du code.
 
-> Pour les sparxs (ceci n'est pas encore implémenté), nous sommes partis sur une idée totalement différente de la première, qui était alors temporaire (l'ancienne idée pouvait être la plus instinctive). Ce changement a été fait car la fonction n'était déjà fonctionnelle qu'à moitié (le sens horaire fonctionnait, le sens anti-horaire non) et surtout, beaucoup trop longue (+300 lignes). 
-La (future) nouvelle version vérifiera si les coordonnées actuelles du sparx se trouvent dans lst_coordonnées_polygones (qui contient les sommets de la zone de jeu, ainsi que des différents polygones formés par le(s) joueur(s)). Si les coordonnées s'y trouvent, il regardera alors le prochain couple (ou celui d'avant, en fonction du sens dans lequel tourne le sparx) et se dirigera vers ce prochain point. Si les coordonnées du sparx se trouve dans une autre liste alors que celui-ci est déjà dans une, un chiffre aléatoire sera tiré, et en fonction du résultat, il changera (ou non) de chemin (ce sera la même probabilité pour chaque chemin).
-Cette méthode devrait permettre le mouvement du sparx auteur de la zone capturée par le joueur, ainsi que les déplacements internes.
+> Pour le déplacement des sparxs (non implémenté pour causes de problèmes techniques), nous utilisons les coordonnées des polygones qui composent la zone capturée. Lorsque le sparx se situe sur un point contenu dans une liste de polygones, la fonction va regarder quelle est le point situé avant ou après, en fonction du sens dans lequel tourne le sparx, et en fait sa destination. En comparant les valeurs des coordonnées actuelles et celles de la destination, le sparx pourra se diriger. 
+Pour les mouvements internes : si un point se situe dans plusieurs listes différentes (donc différents polygones), les prochaines coordonnées sont ajoutés dans une liste, puis la destination finale est choisie de manière aléatoire.
 
 > Pour le menu, on est allé pour un qui est simple pour ne pas trop ajouter trop de travail (avec les autres SAEs, TPs, etc). On s'est dit qu'il était possible de faire une fonction pour faire les boîtes avec du texte à l'intérieur mais il y aurait eu beaucoup de variables à mettre et on a décidé de juste copier coller le code (malgré la longueur des fonctions).
 
+> Pour le Qix
 
 ========= Problèmes Rencontrés =========
 - Certaines fonctions, comme debut_egal_fin ou concatenation_safezone, ne fonctionnent pas dans 100% des situations, et on n'arrive pas à trouver la source des problèmes. 
@@ -53,7 +52,4 @@ Ainsi, l'utilisation de ces fonctions peut entraîner des problèmes sur certain
 - Pour le mouvement des Sparx, notamment pour les raisons d'au-dessus
 
 - Limite de temps : bien que le jeu semble simple, en théorie, à coder, certaines choses sont difficiles à implémenter dans les faits, et cela peut être une vraie source
-de perte de temps. De plus, le temps pendant lequel on peut travailler sur le projet est très court, et cela est d'autant plus vrai en cette période de fin de semestre, où s'entremêlent plein de projets et de devoirs qui prennent, eux aussi, du temps (notamment lorsqu'on nous donne un nouveau projet il y a à peine 2 semaines, ce qui fait un peu tard pour ne pas mentir). Les bugs que l'on découvre au fur et à mesure prennent également du temps à résoudre, et devoir ajouter toutes les variantes resserre encore le délai déjà initialement serré, résultant dans le fait que certaines choses soient manquantes.
-
-[Romain : Cela est d'autant plus vrai pour moi, qui suis moins à l'aise sur Python que Jérémy... Ce n'est pas faute d'essayer, j'ai passé, sans aucun doute, plus de 70H à coder, ou en tout cas à essayer, pour n'avoir que peu de résultats; la "seule" chose pour laquelle ma contribution est visible est pour l'aspect graphique du jeu (interface et ce qui lui est lié)
-C'est ce genre de choses, qui sont normalement simple à faire mais avec lesquelles j'ai du mal, qui me donnent une réel sensation de n'être qu'un poids mort pour mon binôme]
+de perte de temps. De plus, le temps pendant lequel on peut travailler sur le projet est très court, et cela est d'autant plus vrai en cette période de fin de semestre, où s'entremêlent plein de projets, de soutenances, de partiels et de devoirs qui prennent, eux aussi, du temps. Les bugs que l'on découvre au fur et à mesure prennent également du temps à résoudre, et devoir ajouter toutes les variantes resserre encore le délai déjà initialement serré, résultant dans le fait que certaines choses soient manquantes, ou pas entièrement fonctionnelles.
