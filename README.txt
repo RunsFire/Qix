@@ -36,12 +36,14 @@ Le programme est composé de 3 fichiers de code :
 - Le début et la fin de la zone capturée est entre 2 points de la safezone,
 - Le début de la zone capturée est entre 2 points de la safezone mais la fin ne l'est pas et donc, tant que la fin n'est pas entre 2 points de la safezone, il faut les supprimer.
 Les coordonnées de la safezone qui sont supprimées doivent être renversées car sinon, le polygone ne serait pas dans le bon ordre.
-La fonction debut_egal_fin n'est utile que pour les extrémités du polygone car, sans cette fonction, il faudrait rajouter, à chaque fonction utilisant l'index i+1 à la safezone, la condition qui vérifie si l'index == len((liste) - 1) ce qui doublerait la taille du code.
+
+> La fonction debut_egal_fin n'est utile que pour les extrémités du polygone car, sans cette fonction, il faudrait rajouter, à chaque fonction utilisant l'index i+1 à la safezone, la condition qui vérifie si l'index == len((liste) - 1) ce qui doublerait la taille du code.
 
 > Pour les sparxs (ceci n'est pas encore implémenté), nous sommes partis sur une idée totalement différente de la première, qui était alors temporaire (l'ancienne idée pouvait être la plus instinctive). Ce changement a été fait car la fonction n'était déjà fonctionnelle qu'à moitié (le sens horaire fonctionnait, le sens anti-horaire non) et surtout, beaucoup trop longue (+300 lignes). 
 La (future) nouvelle version vérifiera si les coordonnées actuelles du sparx se trouvent dans lst_coordonnées_polygones (qui contient les sommets de la zone de jeu, ainsi que des différents polygones formés par le(s) joueur(s)). Si les coordonnées s'y trouvent, il regardera alors le prochain couple (ou celui d'avant, en fonction du sens dans lequel tourne le sparx) et se dirigera vers ce prochain point. Si les coordonnées du sparx se trouve dans une autre liste alors que celui-ci est déjà dans une, un chiffre aléatoire sera tiré, et en fonction du résultat, il changera (ou non) de chemin (ce sera la même probabilité pour chaque chemin).
 Cette méthode devrait permettre le mouvement du sparx auteur de la zone capturée par le joueur, ainsi que les déplacements internes.
 
+> Pour le menu, on est allé pour un qui est simple pour ne pas trop ajouter trop de travail (avec les autres SAEs, TPs, etc). On s'est dit qu'il était possible de faire une fonction pour faire les boîtes avec du texte à l'intérieur mais il y aurait eu beaucoup de variables à mettre et on a décidé de juste copier coller le code (malgré la longueur des fonctions).
 
 
 ========= Problèmes Rencontrés =========
