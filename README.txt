@@ -59,7 +59,10 @@ puis la destination finale est choisie de manière aléatoire.
 > Pour le menu, on est allé pour un qui est simple pour ne pas trop ajouter trop de travail (avec les autres SAEs, TPs, etc). On s'est dit qu'il était possible de faire une 
 fonction pour faire les boîtes avec du texte à l'intérieur mais il y aurait eu beaucoup de variables à mettre et on a décidé de juste copier coller le code (malgré la longueur des fonctions).
 
-> Pour le Qix
+> Pour le Qix (qui est trop aléatoire, le rendant peu mobile), j'ai pensé au fait qu'un point de la zone de jeu est choisis aléatoirement. Si ce point se situe dans la
+zone capturée, alors un autre est choisi. Le Qix se déplacera alors vers ce point en ligne droite. S'il rencontre une zone capturée au cours de son chemin, il s'arrête alors
+et choisis un nouveau point qui deviendra alors sa destination. Cependant, par manque de temps, je n'ai pas pu implémenté ce moyen de déplacement, et le Qix reste donc
+un peu bête dans ses déplacements.
 
 ========= Problèmes Rencontrés =========
 - Certaines fonctions, comme debut_egal_fin ou concatenation_safezone, ne fonctionnent pas dans 100% des situations, et on n'arrive pas à trouver la source des problèmes. 
