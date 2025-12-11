@@ -382,7 +382,7 @@ if __name__ == "__main__" :
     lst_variantes = []
     # les variables dans l'ordre :
     # obstacles, pommes, vies, nivInit, vitLent, vitRap, vitQIX, vitSp, aCapt, QIXSize, PlayerSize, vitQIX+, vitSp+, niv+, aCapt+
-    lst_options = ["5", "3", "3", "1", "5", "10", "1", "0.75", "75", "10", "10", "0.25", "0.125", "5", "1"]
+    lst_options = [5, 3, 1, 5, 10, 1, 0.75, 75, 10, 10, 0.25, 0.125, 5, 1]
     
     # les variables dans l'ordre :
     # monter1, gauche1, bas1, droite1, lent1, rapide1, monter2, gauche2, bas2, droite2, lent2, rapide2
@@ -449,7 +449,7 @@ if __name__ == "__main__" :
 
         cxQIX = largeurFenetre // 2                   
         cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
-        carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX",None)
+        carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX")
 
 
     #   ========= Définition des Sparx =========
@@ -575,13 +575,13 @@ if __name__ == "__main__" :
                             cxQIX += -dxQIX
                             cyQIX += -dyQIX
                             efface("QIX")
-                            carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX",None)
+                            carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX")
 
                         else :
                             cxQIX += dxQIX
                             cyQIX += dyQIX
                             efface("QIX")
-                            carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX",None)
+                            carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX")
                     
 
 
@@ -646,7 +646,7 @@ if __name__ == "__main__" :
                 cy += dy
 
                 if "Obstacles" in lst_variantes :
-                    for e in lst_obstacles :
+                    for e in lst_obstacles : # type: ignore
                         if encadrement_deux_sens(e[0], cx, e[0] + 10) and encadrement_deux_sens(e[1], cy, e[1]+10) :
                             cx = cx - dx
                             cy = cy - dy
@@ -701,7 +701,7 @@ if __name__ == "__main__" :
                             efface("Trainée")
                             if "Obstacles" in lst_variantes :
                                 efface("obstacles")
-                                for e in lst_obstacles :
+                                for e in lst_obstacles : # type: ignore
                                     carre(e[0], e[1], 10, "orange", "orange", "obstacles", 1)
                             efface("Zonecapturee")
                             lst_coordonnees_curseur = []
@@ -762,7 +762,7 @@ if __name__ == "__main__" :
                 depQIX += lst_options[11]
                 cxQIX = largeurFenetre // 2
                 cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
-                carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX",None)
+                carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX")
 
                 zonetot = 0
                 efface("Zonecapturee")

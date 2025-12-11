@@ -2,7 +2,7 @@ import doctest
 
 
 
-def aire(lst: list, positif=True) -> list :                # Pas 100% sur que ça marche toujours
+def aire(lst: list, positif=True) -> float :                # Pas 100% sur que ça marche toujours
     """ Renvoie l'aire d'un polygone ayant pour sommet (x,y) dans une liste lst. positif est un booleen qui permet de laisser ou pas une aire négative en retour.
     :param list lst: matrice de coordonnées du polygone
     :param bool positif: booléen pour avoir un nombre positif à la fin
@@ -232,6 +232,8 @@ def concatenation_safezone(lst_safezone: list, zone_capturee: list) -> tuple :  
                 sommets_supprime.reverse()
                 lst_safezone = lst_safezone[:i+1] + zone_capturee + lst_safezone[i+1:]
                 return (lst_safezone, sommets_supprime)
+    
+    raise ValueError("Les coordonnées de la zone capturée ne correspondent pas à la safezone.")
 
 
 

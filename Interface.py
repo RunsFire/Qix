@@ -24,7 +24,7 @@ def carre(x: int, y: int, cote: int, coul="black", remplir=None, nom=None, taill
 
 
 
-def ecran_launch(zonetot: float, zone_a_capture: float, nbVies: int, niveau: int, score: int) -> tuple :
+def ecran_launch(zonetot: float, zone_a_capture: float, nbVies: int, niveau: int, score: int | None) -> tuple :
     """Crée le menu de départ."""
     coin_sup_gauche = [200,180]
     coin_inf_droite = [800,850]
@@ -55,17 +55,17 @@ def ecran_launch(zonetot: float, zone_a_capture: float, nbVies: int, niveau: int
     # - = - = - Indications - = - = -
     texte(850,113,"Drawing","red","center", police="Courier",taille=20, tag="dessiner")
     # - = - = - Score - = - = - 
-    if score != None :
+    if score is not None :
         texte(106,50, "Score :","white","center", police="Lucida Console",taille=30)
         texte(275,50, str(score),"white","center", police="Lucida Console",taille=30, tag="score")
     return coin_sup_gauche, coin_inf_droite
 
 
 
-def update_act(zonetot: float, score: int) -> None:
+def update_act(zonetot: float, score: int | None) -> None:
     '''Mettre à jour les différentes informations qui doivent l'être après chaque action.'''
     texte(106,113, str(round(zonetot,2)) + "%","white","center", police="Lucida Console",taille=30, tag="Zonecapturee")
-    if score != None :
+    if score is not None :
         texte(275,50, str(score),"white","center", police="Lucida Console",taille=30, tag="score")
 
 def update_round(zone_a_capture: int, nbVies: int, niveau: int) -> None:
@@ -205,7 +205,7 @@ def menu_principal(largeurFenetre: int, hauteurFenetre: int, path: str) -> str :
                         if largeurFenetre // 2 - 100 <= x_souris <= largeurFenetre // 2 - 40 :
                             rectangle(largeurFenetre // 2 - 100, hauteurFenetre // 2 + 80, largeurFenetre // 2 - 40, hauteurFenetre // 2 + 50, "red", epaisseur=2, tag="cadre")
                             if tev == "ClicGauche" :
-                                return None
+                                return ""
                         elif largeurFenetre // 2 + 40 <= x_souris <= largeurFenetre // 2 + 100 :
                             rectangle(largeurFenetre // 2 + 100, hauteurFenetre // 2 + 80, largeurFenetre // 2 + 40, hauteurFenetre // 2 + 50, "lime", epaisseur=2, tag="cadre")
                             if tev == "ClicGauche" :
@@ -214,11 +214,13 @@ def menu_principal(largeurFenetre: int, hauteurFenetre: int, path: str) -> str :
                                 efface('oui')
                                 break
                     if tev == "Quitte" :
-                        return None
+                        return ""
                     elif tev == "Touche" :
                         if touche(ev) == "Escape" :
-                            return None
+                            return ""
                     mise_a_jour()
+    raise NotImplementedError("Fonction menu_parametres non implémentée au delà de ce point.")
+
 
 
 def menu_variantes(largeurFenetre: int, hauteurFenetre: int, path: str, lst_variantes: list) -> tuple :
@@ -390,6 +392,7 @@ def menu_parametres(largeurFenetre: int, hauteurFenetre: int, path: str) -> str 
         elif tev == "Touche" :
             if touche(ev) == "Escape" :
                 return "Principal"
+    raise NotImplementedError("Fonction menu_parametres non implémentée au delà de ce point.")
 
 def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_options: list) -> tuple :
     rectangle(0,0, largeurFenetre, hauteurFenetre, "black", "black", 1, "bg")
@@ -879,14 +882,14 @@ if __name__ == "__main__" :
     lst_options = ["5", "3", "3", "1", "5", "10", "1", "0.75", "75", "10", "10", "0.25", "0.125", "5", "1"]
     lst_touches = ["Up", "Left", "Down", "Right", "Ctrl_R", "Return", "z", "q", "s", "d", "a", "Shift_L"]
     variable = menu_principal(largeurFenetre, hauteurFenetre, path)
-    while variable != None :
+    while variable is not None :
         efface_tout()
         if variable == "Principal" :
             variable = menu_principal(largeurFenetre, hauteurFenetre, path)
         elif variable == "Variantes" :
             variable, lst_variantes = menu_variantes(largeurFenetre, hauteurFenetre, path, lst_variantes)
         elif variable == "Parametres" :
-            while variable != None and variable != "Principal" :
+            while variable is not None and variable != "Principal" :
                 efface_tout()
                 if variable == "Parametres" :
                     variable = menu_parametres(largeurFenetre, hauteurFenetre, path)
