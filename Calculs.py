@@ -2,9 +2,10 @@ import doctest
 
 
 
-
-def aire(lst, positif) :                # Pas 100% sur que ça marche toujours
+def aire(lst: list, positif=True) -> list :                # Pas 100% sur que ça marche toujours
     """ Renvoie l'aire d'un polygone ayant pour sommet (x,y) dans une liste lst. positif est un booleen qui permet de laisser ou pas une aire négative en retour.
+    :param list lst: matrice de coordonnées du polygone
+    :param bool positif: booléen pour avoir un nombre positif à la fin
     >>> aire([[2,2],[4,2],[4,4],[2,4]],True)
     4.0
     >>> aire([[4,2],[2,2],[2,4],[4,4],[4,2],[2,2]],False)
@@ -38,8 +39,7 @@ def aire(lst, positif) :                # Pas 100% sur que ça marche toujours
 
 
 
-
-def sommets(lst) :
+def sommets(lst: list) -> list :
     """ Renvoie les coordonnées des sommets d'une liste de coordonnées de points
     >>> lst = [[500.0, 795], [500.0, 770], [500.0, 765], [475.0, 765], [470.0, 765], [470.0, 760], [475.0, 760], [475.0, 755], [470.0, 755], [470.0, 750], [470.0, 725], [490.0, 725], [495.0, 725], [495.0, 730], [495.0, 735], [495.0, 740]]
     >>> sommets(lst)
@@ -83,8 +83,13 @@ def sommets(lst) :
 
 
 
-def encadrement(element1, element2, element3, egal1, egal2) :
+def encadrement(element1: float, element2: float, element3: float, egal1=True, egal2=True) -> bool :
     """Renvoie True si l'element2 est compris entre l'element1 et l'element3. egal est un bouléen qui rajoute l'égalité si besoin.
+    :param float element1: premier élément à encadrer
+    :param float element2: élément à encadrer
+    :param float element3: dernier élément à encadrer
+    :param bool egal1: ajoute l'égalité à la première opération (défaut True)
+    :param bool egal2: ajoute l'égalité à la seconde opération (défaut True)
     >>> encadrement(2,2,2,True,True)
     True
     >>> encadrement(2,2,2,False,True)
@@ -121,8 +126,13 @@ def encadrement(element1, element2, element3, egal1, egal2) :
 
 
 
-def encadrement_deux_sens(element1, element2, element3, egal1, egal2) :
-    """Effectue l'encadrement de element2 dans les 2 sens (element1 < element2 < element3 ou element3 < element2 < element1)"""
+def encadrement_deux_sens(element1: float, element2: float, element3: float, egal1=True, egal2=True) -> bool :
+    """Effectue l'encadrement de element2 dans les 2 sens (element1 < element2 < element3 ou element3 < element2 < element1)
+    :param float element1: premier élément à encadrer
+    :param float element2: élément à encadrer
+    :param float element3: dernier élément à encadrer
+    :param bool egal1: ajoute l'égalité à la première opération (défaut True)
+    :param bool egal2: ajoute l'égalité à la seconde opération (défaut True)"""
     return encadrement(element1,element2,element3,egal1,egal2) or encadrement(element3,element2,element1,egal1,egal2)
 
 
@@ -130,7 +140,7 @@ def encadrement_deux_sens(element1, element2, element3, egal1, egal2) :
 
 
 
-def cw_a_ccw(M) :
+def cw_a_ccw(M: list) -> list :
     """Renvoie la matrice de coordonnées dans un sens (aiguille d'une montre (cw) ou contraire à l'aiguille d'une montre (ccw)) dans le sens contraire de l'aiguille d'une montre
     >>> cw_a_ccw([[2,2],[4,2],[4,4],[2,4]])
     [[2, 2], [4, 2], [4, 4], [2, 4]]
@@ -159,12 +169,12 @@ def cw_a_ccw(M) :
 
 
 
-
-def concatenation_safezone(lst_safezone, zone_capturee) :   # Ne fonctionne pas pour tous les cas encore et est la raison que le jeu crash quelque fois
+def concatenation_safezone(lst_safezone: list, zone_capturee: list) -> tuple :   # Ne fonctionne pas pour tous les cas encore et est la raison que le jeu crash quelque fois
     """Renvoie une matrice avec les coordonnées de zone_capturee dans lst_safezone. Supprime des coordonnées si nécessaire.
        Le sens anti-horaire est nécessaire pour la matrice zone_capturee."""
     sommets_supprime = []
     for i in range (len(lst_safezone) - 1) :
+
         if ((zone_capturee[0][0] == lst_safezone[i][0] and zone_capturee[0][0] != zone_capturee[-1][0]    # Vérifie si le 1er point de la zone capturée
         and  encadrement_deux_sens(lst_safezone[i][1],zone_capturee[0][1],lst_safezone[i+1][1],True,True))                  # n'est pas sur la même ligne de la safezone
         or  (zone_capturee[0][1] != zone_capturee[-1][1] and zone_capturee[0][1] == lst_safezone[i][1]    # que le dernier
@@ -178,10 +188,9 @@ def concatenation_safezone(lst_safezone, zone_capturee) :   # Ne fonctionne pas 
             sommets_supprime.reverse()                                                  # Pour que la liste des coordonnées soit dans le bon sens
             lst_safezone = lst_safezone[:i+1] + zone_capturee + lst_safezone[i+1:]      # Insertion des éléments de la zone_capturee dans lst_safezone
             return (lst_safezone, sommets_supprime)
-       
+        
 
-
-        elif zone_capturee[0] == lst_safezone[i] :
+        elif zone_capturee[0] == lst_safezone[i] == zone_capturee[-1] :
             lst_safezone.pop(i)
             lst_safezone = lst_safezone[:i+1] + zone_capturee[1:] + lst_safezone[i+1:]
             return (lst_safezone, None)
@@ -217,7 +226,7 @@ def concatenation_safezone(lst_safezone, zone_capturee) :   # Ne fonctionne pas 
                 else :
                     while True :
                         sommets_supprime.append(lst_safezone.pop(i+1))
-                        if lst_safezone[i+1][0] == zone_capturee[len(zone_capturee)-1][0] or lst_safezone[i+1][1] == zone_capturee[len(zone_capturee)-1][1] :
+                        if lst_safezone[i+1][0] == zone_capturee[-1][0] or lst_safezone[i+1][1] == zone_capturee[-1][1] :
                             sommets_supprime.append(lst_safezone.pop(i+1))
                             break
                 sommets_supprime.reverse()
@@ -230,7 +239,7 @@ def concatenation_safezone(lst_safezone, zone_capturee) :   # Ne fonctionne pas 
 
 
 
-def debut_egal_fin(lst_safezone,debut_safezone) :       # Fonctionne pas toujours
+def debut_egal_fin(lst_safezone: list , debut_safezone: list) -> tuple :       # Fonctionne pas toujours
     """Renvoie lst_safezone avec les 2 premiers éléments dans la même disposition que les 2 derniers éléments. debut_safezone permet de savoir quelles coordonnées ont changé et changer les coordonnées nécessaires."""
     lst_safezone_copie = list(lst_safezone)
 
