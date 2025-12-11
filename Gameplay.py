@@ -382,7 +382,7 @@ if __name__ == "__main__" :
     lst_variantes = []
     # les variables dans l'ordre :
     # obstacles, pommes, vies, nivInit, vitLent, vitRap, vitQIX, vitSp, aCapt, QIXSize, PlayerSize, vitQIX+, vitSp+, niv+, aCapt+
-    lst_options = [5, 3, 1, 5, 10, 1, 0.75, 75, 10, 10, 0.25, 0.125, 5, 1]
+    lst_options = [5, 3, 3, 1, 5, 10, 1, 0.75, 75, 10, 10, 0.25, 0.125, 5, 1]
     
     # les variables dans l'ordre :
     # monter1, gauche1, bas1, droite1, lent1, rapide1, monter2, gauche2, bas2, droite2, lent2, rapide2
@@ -410,11 +410,6 @@ if __name__ == "__main__" :
     if variable == None :
         ferme_fenetre()
     else :
-        for i in range(len(lst_options)) :
-            if "." in lst_options[i] :
-                lst_options[i] = float(lst_options[i])
-            else :
-                lst_options[i] = int(lst_options[i])
 
     #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
     #   *               Mise en place des différents éléments               *

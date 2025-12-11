@@ -44,35 +44,35 @@ def ecran_launch(zonetot: float, zone_a_capture: float, nbVies: int, niveau: int
     # * - * = * - * = * - * Score * - * = * - * = * - *
     # - = - = - Taux de capture - = - = -
     ligne(186,129,206,95,"gray",epaisseur="2")
-    texte(106,113, str(round(zonetot,2)) + " %","white","center", police="Lucida Console",taille=30, tag="Zonecapturee")
-    texte(260,113, str(zone_a_capture) + "%","gray","center", police="Lucida Console",taille=30, tag="Zone_a_capturee")
+    texte(106,113, f"{zonetot:.2f} %","white","center", police="Lucida Console",taille=30, tag="Zonecapturee")
+    texte(260,113, f"{zone_a_capture} %","gray","center", police="Lucida Console",taille=30, tag="Zone_a_capturee")
     # - = - = - Vies - = - = - 
-    texte(670,114, str(nbVies), "Violet", "center", police="Lucida Console", taille = 25, tag = "nbVies")
+    texte(670,114, f"{nbVies}", "Violet", "center", police="Lucida Console", taille = 25, tag = "nbVies")
     image(700,113, os.path.join(path,'heart.gif'), ancrage="center",tag="im")
     # - = - = - Niveau - = - = -
     texte(775,55, "Niveau :","light gray","center", police="Lucida Console",taille=30)
-    texte(900,55,str(niveau),"light gray","center", police="Lucida Console",taille=30, tag="niveau")
+    texte(900,55,f"{niveau}","light gray","center", police="Lucida Console",taille=30, tag="niveau")
     # - = - = - Indications - = - = -
     texte(850,113,"Drawing","red","center", police="Courier",taille=20, tag="dessiner")
     # - = - = - Score - = - = - 
     if score is not None :
         texte(106,50, "Score :","white","center", police="Lucida Console",taille=30)
-        texte(275,50, str(score),"white","center", police="Lucida Console",taille=30, tag="score")
+        texte(275,50, f"{score}","white","center", police="Lucida Console",taille=30, tag="score")
     return coin_sup_gauche, coin_inf_droite
 
 
 
 def update_act(zonetot: float, score: int | None) -> None:
     '''Mettre à jour les différentes informations qui doivent l'être après chaque action.'''
-    texte(106,113, str(round(zonetot,2)) + "%","white","center", police="Lucida Console",taille=30, tag="Zonecapturee")
+    texte(106,113, f"{zonetot:.2f} %","white","center", police="Lucida Console",taille=30, tag="Zonecapturee")
     if score is not None :
-        texte(275,50, str(score),"white","center", police="Lucida Console",taille=30, tag="score")
+        texte(275,50, f"{score}","white","center", police="Lucida Console",taille=30, tag="score")
 
 def update_round(zone_a_capture: int, nbVies: int, niveau: int) -> None:
     '''Mettre à jour les différentes informations qui doivent l'être après chaque niveau.'''
-    texte(260,113, str(zone_a_capture) + "%","gray","center", police="Lucida Console",taille=30, tag="Zone_a_capturee")
-    texte(670,114, str(nbVies), "Violet", "center", police="Liberation Mono",taille=25, tag = "nbVies")
-    texte(900,55,str(niveau),"light gray","center", police="Liberation Mono",taille=30, tag="niveau")
+    texte(260,113, f"{zone_a_capture} %","gray","center", police="Lucida Console",taille=30, tag="Zone_a_capturee")
+    texte(670,114, f"{nbVies}", "Violet", "center", police="Liberation Mono",taille=25, tag = "nbVies")
+    texte(900,55,f"{niveau}","light gray","center", police="Liberation Mono",taille=30, tag="niveau")
     draw(0)
 
 def draw(spd: int) -> None:
@@ -117,7 +117,7 @@ def affichage_gagne(niveau: int) -> None :
     mise_a_jour()
     attend_clic_gauche()
     efface("Gagner")
-    texte(largeurFenetre / 2, hauteurFenetre / 2 - 30, "Niveau " + str(niveau), "Red", "center", police="Lucida Console", taille = 25, tag = "Niveau")
+    texte(largeurFenetre / 2, hauteurFenetre / 2 - 30, f"Niveau {niveau}", "Red", "center", police="Lucida Console", taille = 25, tag = "Niveau")
     mise_a_jour()
     attend_clic_gauche()
     efface("Niveau")
@@ -130,7 +130,7 @@ def affichage_gagne(niveau: int) -> None :
 
 def curseur(x: int, y: int, rayon: int) -> None :
     """Dessine le joueur (qui est un cercle bleu)"""
-    cercle(x, y, rayon, "Aqua",epaisseur='2', tag = "curseur")
+    cercle(x, y, rayon, "Aqua",epaisseur='4', tag = "curseur")
 
 
 
@@ -456,7 +456,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
     rectangle(375, 450, 575, 500, "white", epaisseur=2, tag="cadre")
     texte(475, 475, "Zone à capturer", "white", "center", taille=15, tag="zone_a_capturerI")
     rectangle(575, 449, 625, 500, "white", tag="bouton")
-    texte(600, 475, lst_options[8] + " %", "white", "center", taille=14, tag="nb_zone_a_capturerI")
+    texte(600, 475, f"{lst_options[8]}%", "white", "center", taille=14, tag="nb_zone_a_capturerI")
 
     rectangle(375, 525, 575, 575, "white", epaisseur=2, tag="cadre")
     texte(475, 550, "Taille du QIX", "white", "center", taille=14, tag="tailleQIX")
@@ -489,7 +489,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
 
     rectangle(665, 445, 935, 735, "#45FFCA", epaisseur=3, tag="cadre")
     texte(800, 475, "Incrémentation", "#45FFCA", "center", tag="titre")
-    texte(800, 505, "par "+ lst_options[13] +" niveaux", "#45FFCA", "center", tag="titre")
+    texte(800, 505, f"par {lst_options[13]} niveaux", "#45FFCA", "center", tag="titre")
     ligne(665, 535, 935, 535, "#45FFCA", 3, "ligne")
 
     rectangle(675, 545, 875, 595, "white", epaisseur=2, tag="cadre")
@@ -500,7 +500,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
     rectangle(675, 620, 875, 670, "white", epaisseur=2, tag="cadre")
     texte(775, 645, "Zone à capturer", "white", "center", taille=15, tag="zone_a_capturer+")
     rectangle(875, 619, 925, 670, "white", tag="bouton")
-    texte(900, 645, lst_options[14] + " %", "white", "center", taille=15, tag="nb_zone_a_capturer+")
+    texte(900, 645, f"{lst_options[14]} %", "white", "center", taille=15, tag="nb_zone_a_capturer+")
 
 
     rectangle(largeurFenetre // 2 - 200, hauteurFenetre - 100, largeurFenetre // 2 + 200, hauteurFenetre - 150, "white", epaisseur=2, tag="bouton")
@@ -524,7 +524,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nombre_obstacles")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[0] = entree
+                        if "." not in entree :
+                            lst_options[0] = int(entree)
+                        else :
+                            lst_options[0] = float(entree)
                     texte(300, 325, lst_options[0], "white", "center", taille=15, tag="nombre_obstacles")
             elif 374 <= y_souris <= 425 :
                 rectangle(275, 374, 325, 425, "blue", tag="rectangle")
@@ -532,7 +535,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nombre_pommes")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[1] = entree
+                        if "." not in entree :
+                            lst_options[1] = int(entree)
+                        else :
+                            lst_options[1] = float(entree)
                     texte(300, 400, lst_options[1], "white", "center", taille=15, tag="nombre_pommes")
             elif 449 <= y_souris <= 500 :
                 rectangle(275, 449, 325, 500, "blue", tag="rectangle")
@@ -540,7 +546,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nombre_vies")
                     entree = input(True)
                     if entree != "" and entree > "0" and ("." not in entree) :
-                        lst_options[2] = entree
+                        lst_options[2] = int(entree)
                     texte(300, 475, lst_options[2], "white", "center", taille=15, tag="nombre_vies")
             elif 524 <= y_souris <= 575 :
                 rectangle(275, 524, 325, 575, "blue", tag="rectangle")
@@ -548,7 +554,7 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nb_niveau")
                     entree = input(True)
                     if entree != "" and entree > "0" and ("." not in entree) :
-                        lst_options[3] = entree
+                        lst_options[3] = int(entree)
                     texte(300, 550, lst_options[3], "white", "center", taille=15, tag="nb_niveau")
             elif 599 <= y_souris <= 650 :
                 rectangle(275, 599, 325, 650, "blue", tag="rectangle")
@@ -556,7 +562,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nombre_JoueurSpd(n)")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[4] = entree
+                        if "." in entree :
+                            lst_options[4] = float(entree)
+                        else :
+                            lst_options[4] = int(entree)
                     texte(300, 625, lst_options[4], "white", "center", taille=15, tag="nombre_JoueurSpd(n)")
             elif 674 <= y_souris <= 725 :
                 rectangle(275, 674, 325, 725, "blue", tag="rectangle")
@@ -564,7 +573,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nombre_JoueurSpd(f)")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[5] = entree
+                        if "." in entree :
+                            lst_options[5] = float(entree)
+                        else :
+                            lst_options[5] = int(entree)
                     texte(300, 700, lst_options[5], "white", "center", taille=15, tag="nombre_JoueurSpd(f)")
         elif 575 <= x_souris <= 625 :
             if 299 <= y_souris <= 350 :
@@ -573,7 +585,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nb_QIXspdI")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[6] = entree
+                        if "." in entree :
+                            lst_options[6] = float(entree)
+                        else :
+                            lst_options[6] = int(entree)
                     texte(600, 325, lst_options[6], "white", "center", taille=15, tag="nb_QIXspdI")
             elif 374 <= y_souris <= 425 :
                 rectangle(575, 374, 625, 425, "blue", tag="rectangle")
@@ -581,7 +596,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nb_SparxspdI")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[7] = entree
+                        if "." in entree :
+                            lst_options[7] = float(entree)
+                        else :
+                            lst_options[7] = int(entree)
                     texte(600, 400, lst_options[7], "white", "center", taille=15, tag="nb_SparxspdI")
             elif 449 <= y_souris <= 500 :
                 rectangle(575, 449, 625, 500, "blue", tag="rectangle")
@@ -590,15 +608,21 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     entree = input(True)
                     print(entree, float(entree) > 0, float(entree) < 100)
                     if entree != "" and float(entree) > 0 and float(entree) < 100 :
-                        lst_options[8] = entree
-                    texte(600, 475, lst_options[8] + " %", "white", "center", taille=13, tag="nb_zone_a_capturerI")
+                        if "." in entree :
+                            lst_options[8] = float(entree)
+                        else :
+                            lst_options[8] = int(entree)
+                    texte(600, 475, f"{lst_options[8]} %", "white", "center", taille=13, tag="nb_zone_a_capturerI")
             elif 524 <= y_souris <= 575 :
                 rectangle(575, 524, 625, 575, "blue", tag="rectangle")
                 if tev == "ClicGauche" :
                     efface("nb_tailleQIX")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[9] = entree
+                        if "." in entree :
+                            lst_options[9] = float(entree)
+                        else :
+                            lst_options[9] = int(entree)
                     texte(600, 550, lst_options[9], "white", "center", taille=15, tag="nb_tailleQIX")
             elif 599 <= y_souris <= 650 :
                 rectangle(575, 599, 625, 650, "blue", tag="rectangle")
@@ -606,7 +630,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nb_tailleJoueur")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[10] = entree
+                        if "." in entree :
+                            lst_options[10] = float(entree)
+                        else :
+                            lst_options[10] = int(entree)
                     texte(600, 625, lst_options[10], "white", "center", taille=15, tag="nb_tailleJoueur")
         elif 875 <= x_souris <= 925 :
             if 299 <= y_souris <= 350 :
@@ -615,7 +642,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nb_QIXspd+")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[11] = entree
+                        if "." in entree :
+                            lst_options[11] = float(entree)
+                        else :
+                            lst_options[11] = int(entree)
                     texte(900, 325, lst_options[11], "white", "center", taille=15, tag="nb_QIXspd+")
             elif 374 <= y_souris <= 425 :
                 rectangle(875, 374, 925, 425, "blue", tag="rectangle")
@@ -623,7 +653,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nb_Sparxspd+")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[12] = entree
+                        if "." in entree :
+                            lst_options[12] = float(entree)
+                        else :
+                            lst_options[12] = int(entree)
                     texte(900, 400, lst_options[12], "white", "center", taille=15, tag="nb_Sparxspd+")
             elif 544 <= y_souris <= 595 :
                 rectangle(875, 544, 925, 595, "blue", tag="rectangle")
@@ -631,7 +664,10 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nb_+")
                     entree = input(True)
                     if entree != "" and float(entree) > 0 :
-                        lst_options[13] = entree
+                        if "." in entree :
+                            lst_options[13] = float(entree)
+                        else :
+                            lst_options[13] = int(entree)
                     texte(900, 570, lst_options[13], "white", "center", taille=15, tag="nb_+")
             elif 619 <= y_souris <= 670 :
                 rectangle(875, 619, 925, 670, "blue", tag="rectangle")
@@ -639,8 +675,11 @@ def menu_options(largeurFenetre: int, hauteurFenetre: int, path: str, lst_option
                     efface("nb_zone_a_capturer+")
                     entree = input(True)
                     if entree != "" :
-                        lst_options[14] = entree
-                    texte(900, 645, lst_options[14] + " %", "white", "center", taille=15, tag="nb_zone_a_capturer+")
+                        if "." in entree :
+                            lst_options[14] = float(entree)
+                        else :
+                            lst_options[14] = int(entree)
+                    texte(900, 645, f"{lst_options[14]} %", "white", "center", taille=15, tag="nb_zone_a_capturer+")
         mise_a_jour()
         if tev == "Quitte" :
             break
