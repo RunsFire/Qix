@@ -37,7 +37,7 @@ def _draw_ui_elements(captured_zone: float, target_zone: float, lives: int,
 
 
 def start_game(captured_zone: float, target_zone: float, lives: int, 
-                 level: int, score: Optional[int]) -> Tuple[List[int], List[int]]:
+                 level: int, score: Optional[int]) -> Tuple[Tuple[int, int], Tuple[int, int]]:
     """Create the game launch screen with UI elements.
     
     Args:
@@ -50,8 +50,8 @@ def start_game(captured_zone: float, target_zone: float, lives: int,
     Returns:
         Tuple of top-left and bottom-right corner coordinates
     """
-    top_left = [200, 180]
-    bottom_right = [800, 850]
+    top_left = (200, 180)
+    bottom_right = (800, 850)
     
     # Background
     rectangle(0, 0, WIDTH, HEIGHT, remplissage=COLORS["background"])

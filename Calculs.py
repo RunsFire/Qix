@@ -1,25 +1,35 @@
 import doctest
+from typing import List, Tuple, Optional
 
 
+def aire(lst: List[Tuple[float, float]], positif=True) -> float :                # Pas 100% sur que ça marche toujours
+    """Calculate the area of a polygon defined by its vertices.
 
-def aire(lst: list, positif=True) -> float :                # Pas 100% sur que ça marche toujours
-    """ Renvoie l'aire d'un polygone ayant pour sommet (x,y) dans une liste lst. positif est un booleen qui permet de laisser ou pas une aire négative en retour.
-    :param list lst: matrice de coordonnées du polygone
-    :param bool positif: booléen pour avoir un nombre positif à la fin
-    >>> aire([[2,2],[4,2],[4,4],[2,4]],True)
-    4.0
-    >>> aire([[4,2],[2,2],[2,4],[4,4],[4,2],[2,2]],False)
-    -4.0
-    >>> aire([[2,2],[3,2],[4,2],[4,3],[4,4],[3,4],[2,4]],False)
-    4.0
-    >>> aire([],True)
-    Traceback (most recent call last):
+    Args:
+      lst: List of (x, y) tuples representing the polygon's vertices.
+      positif: If True, returns the absolute value of the area (default True).
+
+    Returns:
+      The area of the polygon as a float.
+
+    Raises:
+      AssertionError: If the input list is empty.
+
+    Examples:
+      >>> aire([[2,2],[4,2],[4,4],[2,4]], True)
+      4.0
+      >>> aire([[4,2],[2,2],[2,4],[4,4],[4,2],[2,2]], False)
+      -4.0
+      >>> aire([[2,2],[3,2],[4,2],[4,3],[4,4],[3,4],[2,4]], False)
+      4.0
+      >>> aire([], True)
+      Traceback (most recent call last):
         ...
-    AssertionError
-    >>> aire([[1,1],[2,2]],True)
-    0.0
-    >>> aire([[0,0],[2,0],[2,2],[1,2],[1,3],[3,3],[3,2],[4,2],[4,4],[0,4]],True)
-    10.0
+      AssertionError
+      >>> aire([[1,1],[2,2]], True)
+      0.0
+      >>> aire([[0,0],[2,0],[2,2],[1,2],[1,3],[3,3],[3,2],[4,2],[4,4],[0,4]], True)
+      10.0
     """
     assert lst != []
     aire = 0
@@ -39,19 +49,30 @@ def aire(lst: list, positif=True) -> float :                # Pas 100% sur que �
 
 
 
-def sommets(lst: list) -> list :
-    """ Renvoie les coordonnées des sommets d'une liste de coordonnées de points
-    >>> lst = [[500.0, 795], [500.0, 770], [500.0, 765], [475.0, 765], [470.0, 765], [470.0, 760], [475.0, 760], [475.0, 755], [470.0, 755], [470.0, 750], [470.0, 725], [490.0, 725], [495.0, 725], [495.0, 730], [495.0, 735], [495.0, 740]]
-    >>> sommets(lst)
-    [[500.0, 795], [500.0, 765], [470.0, 765], [470.0, 760], [475.0, 760], [475.0, 755], [470.0, 755], [470.0, 725], [495.0, 725], [495.0, 740]]
-    >>> sommets([])
-    Traceback (most recent call last):
+def sommets(lst: List[Tuple[float, float]]) -> List[Tuple[float, float]] :
+    """Extract the vertices from a list of coordinate points.
+
+    Args:
+      lst: List of (x, y) tuples representing coordinate points.
+
+    Returns:
+      A list of (x, y) tuples representing the vertices of the polygon.
+
+    Raises:
+      AssertionError: If the input list is empty.
+
+    Examples:
+      >>> lst = [(500.0, 795), (500.0, 770), (500.0, 765), (475.0, 765), (470.0, 765), (470.0, 760), (475.0, 760), (475.0, 755), (470.0, 755), (470.0, 750), (470.0, 725), (490.0, 725), (495.0, 725), (495.0, 730), (495.0, 735), (495.0, 740)]
+      >>> sommets(lst)
+      [(500.0, 795), (500.0, 765), (470.0, 765), (470.0, 760), (475.0, 760), (475.0, 755), (470.0, 755), (470.0, 725), (495.0, 725), (495.0, 740)]
+      >>> sommets([])
+      Traceback (most recent call last):
         ...
-    AssertionError
-    >>> sommets([[195, 800]])
-    [[195, 800]]
-    >>> sommets([[195, 800], [200, 800]])
-    [[195, 800], [200, 800]]
+      AssertionError
+      >>> sommets([(195, 800)])
+      [(195, 800)]
+      >>> sommets([(195, 800), (200, 800)])
+      [(195, 800), (200, 800)]
     """
     assert lst != []
     if len(lst) <= 2 :
@@ -84,42 +105,38 @@ def sommets(lst: list) -> list :
 
 
 def encadrement(element1: float, element2: float, element3: float, egal1=True, egal2=True) -> bool :
-    """Renvoie True si l'element2 est compris entre l'element1 et l'element3. egal est un bouléen qui rajoute l'égalité si besoin.
-    :param float element1: premier élément à encadrer
-    :param float element2: élément à encadrer
-    :param float element3: dernier élément à encadrer
-    :param bool egal1: ajoute l'égalité à la première opération (défaut True)
-    :param bool egal2: ajoute l'égalité à la seconde opération (défaut True)
-    >>> encadrement(2,2,2,True,True)
-    True
-    >>> encadrement(2,2,2,False,True)
-    False
-    >>> encadrement(1,2,3,False,False)
-    True
-    >>> encadrement(2,2,3,True,False)
-    True
+    """Check if element2 is between element1 and element3.
+
+    Args:
+      element1: First boundary element.
+      element2: Element to check if it's within bounds.
+      element3: Second boundary element.
+      egal1: If True, includes equality for the first comparison (default True).
+      egal2: If True, includes equality for the second comparison (default True).
+
+    Returns:
+      True if element2 is between element1 and element3, False otherwise.
+
+    Examples:
+      >>> encadrement(2,2,2,True,True)
+      True
+      >>> encadrement(2,2,2,False,True)
+      False
+      >>> encadrement(1,2,3,False,False)
+      True
+      >>> encadrement(2,2,3,True,False)
+      True
     """
     if egal1 == True :
-            if egal2 == True :
-                if element1 <= element2 and element2 <= element3 :
-                    return True
-                else :
-                    return False
-            else :
-                if element1 <= element2 and element2 < element3 :
-                    return True
-                else :
-                    return False
-    elif egal2 == True :
-        if element1 < element2 and element2 <= element3 :
-            return True
-        else :
-            return False
+        resultat1 = element1 <= element2
     else :
-        if element1 < element2 and element2 < element3 :
-            return True
-        else :
-            return False
+        resultat1 = element1 < element2
+    if egal2 == True :
+        resultat2 = element2 <= element3
+    else :
+        resultat2 = element2 < element3
+        
+    return resultat1 and resultat2
 
 
 
@@ -127,12 +144,20 @@ def encadrement(element1: float, element2: float, element3: float, egal1=True, e
 
 
 def encadrement_deux_sens(element1: float, element2: float, element3: float, egal1=True, egal2=True) -> bool :
-    """Effectue l'encadrement de element2 dans les 2 sens (element1 < element2 < element3 ou element3 < element2 < element1)
-    :param float element1: premier élément à encadrer
-    :param float element2: élément à encadrer
-    :param float element3: dernier élément à encadrer
-    :param bool egal1: ajoute l'égalité à la première opération (défaut True)
-    :param bool egal2: ajoute l'égalité à la seconde opération (défaut True)"""
+    """Check if element2 is between element1 and element3 in both directions.
+
+    Performs the encadrement check in both directions: 
+    (element1 < element2 < element3) or (element3 < element2 < element1).
+
+    Args:
+      element1: First boundary element.
+      element2: Element to check if it's within bounds.
+      element3: Second boundary element.
+      egal1: If True, includes equality for the first comparison (default True).
+      egal2: If True, includes equality for the second comparison (default True).
+
+    Returns:
+      True if element2 is between element1 and element3 in either direction, False otherwise."""
     return encadrement(element1,element2,element3,egal1,egal2) or encadrement(element3,element2,element1,egal1,egal2)
 
 
@@ -140,19 +165,34 @@ def encadrement_deux_sens(element1: float, element2: float, element3: float, ega
 
 
 
-def cw_a_ccw(M: list) -> list :
-    """Renvoie la matrice de coordonnées dans un sens (aiguille d'une montre (cw) ou contraire à l'aiguille d'une montre (ccw)) dans le sens contraire de l'aiguille d'une montre
-    >>> cw_a_ccw([[2,2],[4,2],[4,4],[2,4]])
-    [[2, 2], [4, 2], [4, 4], [2, 4]]
-    >>> cw_a_ccw([[2,2],[2,4],[4,4],[4,2]])
-    [[4, 2], [4, 4], [2, 4], [2, 2]]
-    >>> M = [[2,2],[4,2],[4,4],[2,4]]
-    >>> cw_a_ccw(M)
-    [[2, 2], [4, 2], [4, 4], [2, 4]]
-    >>> cw_a_ccw([[800,150],[200,150]])
-    [[200, 150], [800, 150]]
-    >>> cw_a_ccw([[300,450],[300,800]])
-    [[300, 450], [300, 800]]
+def cw_a_ccw(M: List[Tuple[float, float]]) -> List[Tuple[float, float]] :
+    """Convert coordinate matrix from clockwise to counter-clockwise orientation.
+
+    Takes a matrix of coordinates and ensures they are ordered counter-clockwise.
+    If the coordinates are already counter-clockwise, returns them unchanged.
+    If they are clockwise, reverses the order.
+
+    Args:
+      M: List of (x, y) tuples representing polygon vertices.
+
+    Returns:
+      List of (x, y) tuples in counter-clockwise order.
+
+    Raises:
+      AssertionError: If the input list has exactly one element.
+
+    Examples:
+      >>> cw_a_ccw([(2,2),(4,2),(4,4),(2,4)])
+      [(2, 2), (4, 2), (4, 4), (2, 4)]
+      >>> cw_a_ccw([(2,2),(2,4),(4,4),(4,2)])
+      [(4, 2), (4, 4), (2, 4), (2, 2)]
+      >>> M = [(2,2),(4,2),(4,4),(2,4)]
+      >>> cw_a_ccw(M)
+      [(2, 2), (4, 2), (4, 4), (2, 4)]
+      >>> cw_a_ccw([(800,150),(200,150)])
+      [(200, 150), (800, 150)]
+      >>> cw_a_ccw([(300,450),(300,800)])
+      [(300, 450), (300, 800)]
     """
     assert len(M) != 1
     if len(M) == 2 :
@@ -169,9 +209,25 @@ def cw_a_ccw(M: list) -> list :
 
 
 
-def concatenation_safezone(lst_safezone: list, zone_capturee: list) -> tuple :   # Ne fonctionne pas pour tous les cas encore et est la raison que le jeu crash quelque fois
-    """Renvoie une matrice avec les coordonnées de zone_capturee dans lst_safezone. Supprime des coordonnées si nécessaire.
-       Le sens anti-horaire est nécessaire pour la matrice zone_capturee."""
+def concatenation_safezone(lst_safezone: List[Tuple[float, float]], zone_capturee: List[Tuple[float, float]]) -> Tuple[List[Tuple[float, float]], Optional[List[Tuple[float, float]]]] :   # Does not work for all cases yet and is the reason the game sometimes crashes
+    """Merge captured zone coordinates into the safezone coordinates.
+
+    Returns a matrix with the coordinates of zone_capturee inserted into lst_safezone.
+    Removes coordinates if necessary. The counter-clockwise direction is required
+    for the zone_capturee matrix.
+
+    Args:
+      lst_safezone: List of (x, y) tuples representing the current safe zone boundary.
+      zone_capturee: List of (x, y) tuples representing the newly captured zone.
+
+    Returns:
+      A tuple containing:
+        - The updated safezone coordinates as a list of (x, y) tuples
+        - The removed vertices as a list of (x, y) tuples, or None if no vertices were removed
+
+    Raises:
+      ValueError: If the captured zone coordinates don't correspond to the safezone.
+    """
     sommets_supprime = []
     for i in range (len(lst_safezone) - 1) :
 
@@ -233,7 +289,7 @@ def concatenation_safezone(lst_safezone: list, zone_capturee: list) -> tuple :  
                 lst_safezone = lst_safezone[:i+1] + zone_capturee + lst_safezone[i+1:]
                 return (lst_safezone, sommets_supprime)
     
-    raise ValueError("Les coordonnées de la zone capturée ne correspondent pas à la safezone.")
+    raise ValueError("The captured zone coordinates do not correspond to the safezone.")
 
 
 
@@ -241,8 +297,22 @@ def concatenation_safezone(lst_safezone: list, zone_capturee: list) -> tuple :  
 
 
 
-def debut_egal_fin(lst_safezone: list , debut_safezone: list) -> tuple :       # Fonctionne pas toujours
-    """Renvoie lst_safezone avec les 2 premiers éléments dans la même disposition que les 2 derniers éléments. debut_safezone permet de savoir quelles coordonnées ont changé et changer les coordonnées nécessaires."""
+def debut_egal_fin(lst_safezone: List[Tuple[float, float]] , debut_safezone: List[Tuple[float, float]]) -> Tuple[List[Tuple[float, float]], List[Tuple[float, float]]] :       # Does not always work
+    """Ensure the first two elements match the last two elements in the safezone.
+
+    Returns lst_safezone with the first 2 elements in the same arrangement as the
+    last 2 elements. debut_safezone helps track which coordinates have changed
+    and modify the necessary coordinates.
+
+    Args:
+      lst_safezone: List of (x, y) tuples representing the safezone boundary.
+      debut_safezone: List of (x, y) tuples representing the initial safezone state.
+
+    Returns:
+      A tuple containing:
+        - The updated safezone coordinates as a list of (x, y) tuples
+        - The updated debut_safezone coordinates as a list of (x, y) tuples
+    """
     lst_safezone_copie = list(lst_safezone)
 
     if [lst_safezone[0],lst_safezone[1]] != debut_safezone and [lst_safezone[len(lst_safezone)-2],lst_safezone[len(lst_safezone)-1]] != debut_safezone :
