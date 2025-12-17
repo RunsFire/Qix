@@ -1,13 +1,13 @@
-from typing import List, Tuple, Union
+from typing import List
 from Interface.buttons import MenuButton, OptionButton
-from Interface.const import COLORS
+from Interface.const import COLORS, WIDTH, HEIGHT
 from Interface.utils import read_input
 from fltk import rectangle, texte, ligne, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
 
 
 def create_options_menu_ui() -> None:
     """Create the static UI elements for the options menu."""
-    rectangle(0, 0, 1000, 800, COLORS["background"], COLORS["background"], 1, "bg")
+    rectangle(0, 0, WIDTH, HEIGHT, COLORS["background"], COLORS["background"], 1, "bg")
     
     # Draw section frames
     rectangle(65, 200, 335, 735, COLORS["accent"], epaisseur=3, tag="cadre")
@@ -32,12 +32,12 @@ def create_options_menu_ui() -> None:
 def create_options_input_buttons() -> List[OptionButton]:
     """Create all option input buttons for the left side."""
     buttons = [
-        OptionButton(75, 300, "Nombre d'obstacles", 0, "nombre_obstacles"),
-        OptionButton(75, 375, "Nombre de bonus", 1, "nombre_pommes"),
-        OptionButton(75, 450, "Nombre de vies", 2, "nombre_vies"),
-        OptionButton(75, 525, "Niveau initial", 3, "nb_niveau"),
-        OptionButton(75, 600, "Vitesse lente", 4, "nombre_JoueurSpd(n)"),
-        OptionButton(75, 675, "Vitesse rapide", 5, "nombre_JoueurSpd(f)")
+        OptionButton(75, 300, "Nombre d'obstacles", "obstacles", "nombre_obstacles"),
+        OptionButton(75, 375, "Nombre de bonus", "pommes", "nombre_pommes"),
+        OptionButton(75, 450, "Nombre de vies", "vies", "nombre_vies"),
+        OptionButton(75, 525, "Niveau initial", "nivInit", "nb_niveau"),
+        OptionButton(75, 600, "Vitesse lente", "vitLent", "nombre_JoueurSpd(n)"),
+        OptionButton(75, 675, "Vitesse rapide", "vitRap", "nombre_JoueurSpd(f)")
     ]
     return buttons
 
@@ -45,11 +45,11 @@ def create_options_input_buttons() -> List[OptionButton]:
 def create_options_input_buttons_right() -> List[OptionButton]:
     """Create all option input buttons for the right side."""
     buttons = [
-        OptionButton(375, 300, "Vitesse du QIX", 6, "nb_QIXspdI"),
-        OptionButton(375, 375, "Vitesse du Sparx", 7, "nb_SparxspdI"),
-        OptionButton(375, 450, "Zone à capturer", 8, "nb_zone_a_capturerI"),
-        OptionButton(375, 525, "Taille du QIX", 9, "nb_tailleQIX"),
-        OptionButton(375, 600, "Taille du Joueur", 10, "nb_tailleJoueur")
+        OptionButton(375, 300, "Vitesse du QIX", "vitQIX", "nb_QIXspdI"),
+        OptionButton(375, 375, "Vitesse du Sparx", "vitSp", "nb_SparxspdI"),
+        OptionButton(375, 450, "Zone à capturer", "aCapt", "nb_zone_a_capturerI"),
+        OptionButton(375, 525, "Taille du QIX", "QIXSize", "nb_tailleQIX"),
+        OptionButton(375, 600, "Taille du Joueur", "PlayerSize", "nb_tailleJoueur")
     ]
     return buttons
 
@@ -57,15 +57,15 @@ def create_options_input_buttons_right() -> List[OptionButton]:
 def create_options_input_buttons_increment() -> List[OptionButton]:
     """Create increment option input buttons."""
     buttons = [
-        OptionButton(675, 300, "Vitesse du QIX", 11, "nb_QIXspd+"),
-        OptionButton(675, 375, "Vitesse du Sparx", 12, "nb_Sparxspd+"),
-        OptionButton(675, 545, "Incrémentation par", 13, "nb_+"),
-        OptionButton(675, 620, "Zone à capturer", 14, "nb_zone_a_capturer+")
+        OptionButton(675, 300, "Vitesse du QIX", "vitQIX+", "nb_QIXspd+"),
+        OptionButton(675, 375, "Vitesse du Sparx", "vitSp+", "nb_Sparxspd+"),
+        OptionButton(675, 545, "Incrémentation par", "niv+", "nb_+"),
+        OptionButton(675, 620, "Zone à capturer", "aCapt+", "nb_zone_a_capturer+")
     ]
     return buttons
 
 
-def options_menu(width: int, height: int, lst_options: List[Union[str, int, float]]) -> Tuple[str, List[Union[str, int, float]]]:
+def options_menu(width: int, height: int, options: dict) -> str:
     """Display options configuration menu."""
     
     # Draw static UI elements
@@ -79,9 +79,9 @@ def options_menu(width: int, height: int, lst_options: List[Union[str, int, floa
     
     # Draw all option fields
     for button in all_option_buttons:
-        value = lst_options[button.option_index]
-        if button.option_index == 8 or button.option_index == 14:  # Zone percentage
-            value = f"{value}%" if button.option_index == 8 else f"{value} %"
+        value = options[button.option]
+        if button.option == "aCapt" or button.option == "aCapt+":  # Zone percentage
+            value = f"{value} %"
         button.draw_full(value)
 
     # Create and draw menu button
@@ -100,7 +100,7 @@ def options_menu(width: int, height: int, lst_options: List[Union[str, int, floa
         if menu_button.is_clicked(x_souris, y_souris):
             menu_button.highlight()
             if tev == "ClicGauche":
-                return "Parametres", lst_options
+                return "Parametres"
         
         # Check option button interactions
         for button in all_option_buttons:
@@ -111,23 +111,23 @@ def options_menu(width: int, height: int, lst_options: List[Union[str, int, floa
                     entree = read_input(True)
                     if entree != "":
                         # Handle special validation for different fields
-                        if button.option_index in [2, 3]:  # Lives and level - integers only
+                        if button.option in ["vies", "nivInit"]:  # Lives and level - integers only
                             if entree > "0" and "." not in entree:
-                                lst_options[button.option_index] = int(entree)
-                        elif button.option_index == 8:  # Zone capture percentage
+                                options[button.option] = int(entree)
+                        elif button.option == "aCapt":  # Zone capture percentage
                             val = float(entree)
                             if 0 < val < 100:
-                                lst_options[button.option_index] = val
+                                options[button.option] = val
                         else:  # General numeric input
                             if "." in entree:
-                                lst_options[button.option_index] = float(entree)
+                                options[button.option] = float(entree)
                             else:
-                                lst_options[button.option_index] = int(entree)
+                                options[button.option] = int(entree)
                     
                     # Redraw the field with new value
-                    value = lst_options[button.option_index]
-                    if button.option_index == 8 or button.option_index == 14:
-                        value = f"{value}%" if button.option_index == 8 else f"{value} %"
+                    value = options[button.option]
+                    if button.option == "aCapt" or button.option == "aCapt+":
+                        value = f"{value} %"
                     texte(button.x + button.width//2, button.y + button.height//2, 
                          str(value), COLORS["text"], "center", taille=15, tag=button.tag)
         
@@ -136,6 +136,6 @@ def options_menu(width: int, height: int, lst_options: List[Union[str, int, floa
             break
         elif tev == "Touche":
             if touche(ev) == "Escape":
-                return "Parametres", lst_options
+                return "Parametres"
     
-    return "Parametres", lst_options
+    return "Parametres"

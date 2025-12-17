@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Dict
 from Interface.const import COLORS
 from Interface.buttons import MenuButton, KeyButton
 from fltk import rectangle, texte, ligne, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
@@ -8,12 +8,12 @@ from Interface.utils import read_input
 def create_key_buttons_player1() -> List[KeyButton]:
     """Create key binding buttons for Player 1."""
     buttons = [
-        KeyButton(75, 300, "Monter", 0, "touche_monter1"),
-        KeyButton(75, 375, "A gauche", 1, "touche_gauche1"),
-        KeyButton(75, 450, "Descendre", 2, "touche_descendre1"),
-        KeyButton(75, 525, "A droite", 3, "touche_droite1"),
-        KeyButton(75, 600, "Vitesse normale", 4, "touche_spd(n)1"),
-        KeyButton(75, 675, "Vitesse rapide", 5, "touche_spd(f)1")
+        KeyButton(75, 300, "Monter", "monter1", "touche_monter1"),
+        KeyButton(75, 375, "A gauche", "gauche1", "touche_gauche1"),
+        KeyButton(75, 450, "Descendre", "bas1", "touche_descendre1"),
+        KeyButton(75, 525, "A droite", "droite1", "touche_droite1"),
+        KeyButton(75, 600, "Vitesse normale", "lent1", "touche_spd(n)1"),
+        KeyButton(75, 675, "Vitesse rapide", "rapide1", "touche_spd(f)1")
     ]
     return buttons
 
@@ -21,17 +21,17 @@ def create_key_buttons_player1() -> List[KeyButton]:
 def create_key_buttons_player2() -> List[KeyButton]:
     """Create key binding buttons for Player 2."""
     buttons = [
-        KeyButton(375, 300, "Monter", 6, "touche_monter2"),
-        KeyButton(375, 375, "A gauche", 7, "touche_gauche2"),
-        KeyButton(375, 450, "Descendre", 8, "touche_descendre2"),
-        KeyButton(375, 525, "A droite", 9, "touche_droite2"),
-        KeyButton(375, 600, "Vitesse normale", 10, "touche_spd(n)2"),
-        KeyButton(375, 675, "Vitesse rapide", 11, "touche_spd(f)2")
+        KeyButton(375, 300, "Monter", "monter2", "touche_monter2"),
+        KeyButton(375, 375, "A gauche", "gauche2", "touche_gauche2"),
+        KeyButton(375, 450, "Descendre", "bas2", "touche_descendre2"),
+        KeyButton(375, 525, "A droite", "droite2", "touche_droite2"),
+        KeyButton(375, 600, "Vitesse normale", "lent2", "touche_spd(n)2"),
+        KeyButton(375, 675, "Vitesse rapide", "rapide2", "touche_spd(f)2")
     ]
     return buttons
 
 
-def key_menu(width: int, height: int, lst_touches: List[str]) -> Tuple[str, List[str]]:
+def key_menu(width: int, height: int, keys: Dict[str, str]) -> str:
     """Display key bindings configuration menu."""
     rectangle(0, 0, width, height, COLORS["background"], COLORS["background"], 1, "bg")
     # image(largeurFenetre//2,125, os.path.join(PATH,'QIX_logo.gif'), ancrage="center", tag="im", largeur=300, hauteur=int(188*(300/414)))
@@ -54,7 +54,7 @@ def key_menu(width: int, height: int, lst_touches: List[str]) -> Tuple[str, List
     
     # Draw all key binding fields
     for button in all_key_buttons:
-        key_name = lst_touches[button.key_index]
+        key_name = keys[button.key]
         button.draw_full(key_name)
 
     # Create and draw menu button
@@ -73,7 +73,7 @@ def key_menu(width: int, height: int, lst_touches: List[str]) -> Tuple[str, List
         if menu_button.is_clicked(x_souris, y_souris):
             menu_button.highlight()
             if tev == "ClicGauche":
-                return "Parametres", lst_touches
+                return "Parametres"
         
         # Check key binding button interactions
         for button in all_key_buttons:
@@ -82,12 +82,12 @@ def key_menu(width: int, height: int, lst_touches: List[str]) -> Tuple[str, List
                 if tev == "ClicGauche":
                     efface(button.tag)
                     entree = read_input(False)  # Allow any key input
-                    if entree != "" and entree not in lst_touches:
-                        lst_touches[button.key_index] = entree
+                    if entree != "" and entree not in keys.values():
+                        keys[button.key] = entree
                     
                     # Redraw the field with new key
                     texte(button.x + button.width//2, button.y + button.height//2, 
-                         lst_touches[button.key_index], COLORS["text"], 
+                         keys[button.key], COLORS["text"], 
                          "center", taille=15, tag=button.tag)
         
         mise_a_jour()
@@ -95,6 +95,6 @@ def key_menu(width: int, height: int, lst_touches: List[str]) -> Tuple[str, List
             break
         elif tev == "Touche":
             if touche(ev) == "Escape":
-                return "Parametres", lst_touches
+                return "Parametres"
     
-    return "Parametres", lst_touches
+    return "Parametres"

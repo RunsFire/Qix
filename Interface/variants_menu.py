@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Set, List
 from Interface.buttons import MenuButton
 from fltk import rectangle, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
 
@@ -17,14 +17,14 @@ def create_variant_buttons() -> List[MenuButton]:
     return buttons
 
 
-def variants_menu(width: int, height: int, lst_variantes: List[str]) -> Tuple[str, List[str]]:
+def variants_menu(width: int, height: int, variants: Set[str]) -> str:
     """Display variants selection menu."""
     rectangle(0, 0, width, height, "black", "black", 1, "bg")
     
     # Create variant buttons and set their selection state
     variant_buttons = create_variant_buttons()
     for button in variant_buttons:
-        button.set_selected(button.action in lst_variantes)
+        button.set_selected(button.action in variants)
         button.draw()
 
     # Create and draw menu button
@@ -43,18 +43,18 @@ def variants_menu(width: int, height: int, lst_variantes: List[str]) -> Tuple[st
         if menu_button.is_clicked(x_souris, y_souris):
             menu_button.highlight()
             if tev == "ClicGauche":
-                return "Principal", lst_variantes
+                return "Principal"
         
         # Check variant buttons
         for button in variant_buttons:
             if button.is_clicked(x_souris, y_souris):
                 button.highlight()
                 if tev == "ClicGauche":
-                    if button.action in lst_variantes:
-                        lst_variantes.remove(button.action)
+                    if button.action in variants:
+                        variants.remove(button.action)
                         button.set_selected(False)
                     else:
-                        lst_variantes.append(button.action)
+                        variants.add(button.action)
                         button.set_selected(True)
                     # Redraw the button with updated selection state
                     button.draw()
@@ -64,6 +64,6 @@ def variants_menu(width: int, height: int, lst_variantes: List[str]) -> Tuple[st
         if tev == "Quitte":
             break
         elif tev == "Touche" and touche(ev) == "Escape":
-            return "Principal", lst_variantes
+            return "Principal"
     
-    return "Principal", lst_variantes
+    return "Principal"

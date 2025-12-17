@@ -62,13 +62,13 @@ class MenuButton:
 class OptionButton(MenuButton):
     """Specialized button for option input fields."""
     
-    def __init__(self, x: int, y: int, label: str, option_index: int, tag: str):
+    def __init__(self, x: int, y: int, label: str, option: str, tag: str):
         # Input field is always 50x50 at x+200, y-1 from label
-        super().__init__(x + 200, y - 1, 50, 51, "", f"option_{option_index}", is_square=False)
+        super().__init__(x + 200, y - 1, 50, 51, "", f"option_{option}", is_square=False)
         self.label = label
         self.label_x = x
         self.label_y = y
-        self.option_index = option_index
+        self.option = option
         self.tag = tag
         
     def draw_full(self, value: Union[str, int, float], tag: str = "bouton") -> None:
@@ -94,13 +94,13 @@ class OptionButton(MenuButton):
 class KeyButton(MenuButton):
     """Specialized button for key binding input fields."""
     
-    def __init__(self, x: int, y: int, label: str, key_index: int, tag: str):
+    def __init__(self, x: int, y: int, label: str, key: str, tag: str):
         # Key input field is always 50x50 at x+200, y-1 from label
-        super().__init__(x + 200, y - 1, 50, 51, "", f"key_{key_index}", is_square=False)
+        super().__init__(x + 200, y - 1, 50, 51, "", f"key_{key}", is_square=False)
         self.label = label
         self.label_x = x
         self.label_y = y
-        self.key_index = key_index
+        self.key = key
         self.tag = tag
         
     def draw_full(self, key_name: str, tag: str = "bouton") -> None:

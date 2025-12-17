@@ -1,61 +1,101 @@
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-#   *                                                                   *
-#   *                              Imports                              *
-#   *                                                                   *
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-
+from typing import List, Set, Tuple, Optional
+from Interface.main_screen import start_game
 from fltk import *
 from Calculs import *
-from Interface import *
-from random import randint
+
+from Interface.menu_controller import menu_controller
+from Interface.const import WIDTH, HEIGHT
+from Interface.utils import draw_player, draw_sparx, draw_square, draw_status, show_game_over, show_level_complete, update_action, update_round
+
+import random
 from math import sin, pi
 
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-#   *                                                                   *
-#   *                             Fonctions                             *
-#   *                                                                   *
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
 
-
-def test_perte(cd_debut: list, cd_joueur: list, cd_QIX: list, cote: float, lst_joueur: list) -> bool :
-    """Renvoie True si le joueur rentre dans sa trainée ou si le QIX rentre dans la trainée du joueur. Dans le cas contraire, renvoie False."""
-    if cd_debut == cd_joueur :
+def test_perte(cd_debut: Tuple[float, float], cd_joueur: Tuple[float, float], cd_QIX: Tuple[float, float], cote: float, lst_joueur: List[Tuple[float, float]]) -> bool:
+    """
+    Test if the player loses due to collision with QIX or self-intersection.
+    
+    Args:
+        cd_debut: Starting coordinates of player trail
+        cd_joueur: Current player coordinates  
+        cd_QIX: QIX center coordinates
+        cote: QIX size (width/height)
+        lst_joueur: List of player trail coordinates
+        
+    Returns:
+        True if collision detected, False otherwise
+    """
+    # Check if player returned to starting position
+    if cd_debut == cd_joueur:
         return True
-    for element in lst_joueur :
-        if encadrement(cd_QIX[0],element[0],cd_QIX[0]+cote,True,True) :
-            if encadrement(cd_QIX[1],element[1],cd_QIX[1] + cote,True,True) :
-                return True
-        if cd_joueur == element :
+    
+    # Calculate QIX bounds from center coordinates
+    qix_half_size = cote / 2
+    qix_left = cd_QIX[0] - qix_half_size
+    qix_right = cd_QIX[0] + qix_half_size
+    qix_top = cd_QIX[1] - qix_half_size
+    qix_bottom = cd_QIX[1] + qix_half_size
+    
+    # Check QIX collision with trail and self-intersection
+    for element in lst_joueur:
+        # Check if QIX collides with any trail point
+        if (qix_left <= element[0] <= qix_right and 
+            qix_top <= element[1] <= qix_bottom):
             return True
+        # Check for self-intersection
+        if cd_joueur == element:
+            return True
+            
     return False
 
 
-def test_sortie_safezone(lst_safezone: list, cx: int, cy: int, dx: int, dy: int, dep: int) -> list :
-    """Renvoie les coordonnées du point où le joueur est sorti de la safezone. Si le joueur ne sort pas de la safezone, renvoie une liste vide."""
-    for i in range (1,len(lst_safezone)-1) :
+def test_sortie_safezone(lst_safezone: List[Tuple[float, float]], cx: float, cy: float, dx: float, dy: float, dep: float) -> Optional[Tuple[float, float]]:
+    """
+    Test if the player exits the safe zone and return the exit coordinates.
+    
+    Args:
+        lst_safezone: List of safe zone boundary coordinates
+        cx: Current player x-coordinate
+        cy: Current player y-coordinate
+        dx: Player x-direction movement
+        dy: Player y-direction movement
+        dep: Player movement speed/distance
+        
+    Returns:
+        Coordinates where player exited safe zone, None if player stays in safe zone
+    """
+    for i in range (1, len(lst_safezone)-1) :
 
         if cx - dx == lst_safezone[i][0] and cy - dy == lst_safezone[i][1] :
             if  ((encadrement_deux_sens(lst_safezone[i-1][0],cx,lst_safezone[i][0],True,True) and encadrement_deux_sens(lst_safezone[i-1][1],cy,lst_safezone[i][1],True,True))
             or  (encadrement_deux_sens(lst_safezone[i][0],cx,lst_safezone[i+1][0],True,True) and encadrement_deux_sens(lst_safezone[i][1],cy,lst_safezone[i+1][1],True,True))) :
-                    return []
+                    return
             else :
-                return [cx - dx, cy - dy]
+                return (cx - dx, cy - dy)
           
         if cy - dy == lst_safezone[i][1] :
             if encadrement_deux_sens(lst_safezone[i][0],cx-dx,lst_safezone[i+1][0],False,False) :
                 if cy == lst_safezone[i][1] + dep or cy == lst_safezone[i][1] - dep :
-                    return [cx - dx, cy - dy]
+                    return (cx - dx, cy - dy)
                     
         elif cx - dx == lst_safezone[i][0] :
             if encadrement_deux_sens(lst_safezone[i][1],cy-dy,lst_safezone[i+1][1],False,False) :
                 if cx == lst_safezone[i][0] + dep or cx == lst_safezone[i][0] - dep :
-                    return [cx - dx, cy - dy]
-          
-    return []
+                    return (cx - dx, cy - dy)
 
 
-def test_entree_safezone(lst_safezone: list, cx: int, cy: int) -> bool :
-    """Renvoie True si le joueur rentre dans la safezone."""
+def test_entree_safezone(lst_safezone: List[Tuple[float, float]], cx: int, cy: int) -> bool:
+    """
+    Test if the player re-enters the safe zone.
+    
+    Args:
+        lst_safezone: List of safe zone boundary coordinates
+        cx: Player x-coordinate
+        cy: Player y-coordinate
+        
+    Returns:
+        True if player enters the safe zone, False otherwise
+    """
     for i in range (len(lst_safezone)-1) :
         if (encadrement_deux_sens(lst_safezone[i][0],cx,lst_safezone[i+1][0],True,True)) and cy == lst_safezone[i][1] :
             return True
@@ -65,8 +105,21 @@ def test_entree_safezone(lst_safezone: list, cx: int, cy: int) -> bool :
     return False
 
 
-def test_interieur_safezone(lst_coordonnees: list, cx: float, cy: float) -> bool :
-    """Test pour savoir si un point est à l'intérieur d'une liste de coordonnées (lst_coordonnees doit être une matrice avec des listes à l'intérieur de taille différentes)"""
+def test_interieur_safezone(lst_coordonnees: List[List[Tuple[float, float]]], cx: float, cy: float) -> bool:
+    """
+    Test if a point is inside a polygon defined by coordinate lists.
+    
+    Uses ray casting algorithm to determine if point (cx, cy) is inside
+    the polygon(s) defined by lst_coordonnees.
+    
+    Args:
+        lst_coordonnees: Matrix of coordinate lists defining polygon boundaries
+        cx: Point x-coordinate to test
+        cy: Point y-coordinate to test
+        
+    Returns:
+        True if point is inside any polygon, False otherwise
+    """
     nb = 0
     for i in range (len(lst_coordonnees)) :
         for j in range (len(lst_coordonnees[i])) :
@@ -84,31 +137,69 @@ def test_interieur_safezone(lst_coordonnees: list, cx: float, cy: float) -> bool
         return True
     
 
-def creation_obstacles(nb_obstacles: int) -> list :
-    """Crée nb_obstacles obstacles et renvoie la liste avec leurs coordonnées."""
+def creation_obstacles(nb_obstacles: int, coin_sup_gauche: Tuple[float, float], coin_inf_droite: Tuple[float, float]) -> List[Tuple[float, float]]:
+    """
+    Create obstacles and return their coordinate list.
+    
+    Generates the specified number of obstacles randomly positioned within
+    the game area boundaries, avoiding duplicates.
+    
+    Args:
+        nb_obstacles: Number of obstacles to create
+        coin_sup_gauche: Top-left corner coordinates of game area
+        coin_inf_droite: Bottom-right corner coordinates of game area
+        
+    Returns:
+        List of obstacle coordinates (x, y tuples)
+    """
     lst_obstacles = []
     nb_cases_abs = (coin_inf_droite[0] - coin_sup_gauche[0]) // 10
     nb_cases_ord = (coin_inf_droite[1] - coin_sup_gauche[1]) // 10
     for i in range(nb_obstacles) :
-        obstacle = [randint(2, nb_cases_abs-2), randint(2, nb_cases_ord-2)]
+        x = random.random() * (nb_cases_abs - 2) + 2
+        y = random.random() * (nb_cases_ord - 2) + 2
+        obstacle = [x, y]
+
+        # Vérification pour éviter les doublons
         while obstacle in lst_obstacles :
-            obstacle = [randint(2, nb_cases_abs-2), randint(2, nb_cases_ord-2)]
+            obstacle = [random.random() * (nb_cases_abs - 2) + 2, random.random() * (nb_cases_ord - 2) + 2]
+
+        # Conversion des coordonnées en pixels
         obstacle[0] = obstacle[0] * 10 + coin_sup_gauche[0]
         obstacle[1] = obstacle[1] * 10 + coin_sup_gauche[1]
         lst_obstacles.append(obstacle)
-        carre(lst_obstacles[i][0], lst_obstacles[i][1], 10, "orange", "orange", "obstacles", 1)
+        draw_square(lst_obstacles[i][0], lst_obstacles[i][1], 10, "orange", "orange", "obstacles")
     return lst_obstacles
 
 
-def creation_pommes(nb_pommes: int) -> list :
-    """docstring"""
+def creation_pommes(nb_pommes: int, coin_sup_gauche: Tuple[float, float], coin_inf_droite: Tuple[float, float]) -> List[Tuple[float, float]]:
+    """
+    Create bonus apples and return their coordinate list.
+    
+    Generates the specified number of bonus apples randomly positioned within
+    the game area boundaries, avoiding duplicates.
+    
+    Args:
+        nb_pommes: Number of bonus apples to create
+        coin_sup_gauche: Top-left corner coordinates of game area
+        coin_inf_droite: Bottom-right corner coordinates of game area
+        
+    Returns:
+        List of apple coordinates (x, y tuples)
+    """
     lst_pommes = []
     nb_cases_abs = (coin_inf_droite[0] - coin_sup_gauche[0]) // 10
     nb_cases_ord = (coin_inf_droite[1] - coin_sup_gauche[1]) // 10
     for i in range(nb_pommes) :
-        pomme = [randint(2, nb_cases_abs-2), randint(2, nb_cases_ord-2)]
+        x = random.random() * (nb_cases_abs - 2) + 2
+        y = random.random() * (nb_cases_ord - 2) + 2
+        pomme = [x, y]
+
+        # Vérification pour éviter les doublons
         while pomme in lst_pommes :
-            pomme = [randint(2, nb_cases_abs-2), randint(2, nb_cases_ord-2)]
+            pomme = [random.random() * (nb_cases_abs - 2) + 2, random.random() * (nb_cases_ord - 2) + 2]
+
+        # Conversion des coordonnées en pixels
         pomme[0] = pomme[0] * 10 + coin_sup_gauche[0]
         pomme[1] = pomme[1] * 10 + coin_sup_gauche[1]
         lst_pommes.append(pomme)
@@ -116,7 +207,33 @@ def creation_pommes(nb_pommes: int) -> list :
     return lst_pommes
 
 
-def mouvement_sparx(cxSparx: float, cySparx: float, cw, last) :   
+def mouvement_sparx(
+    cxSparx: float,
+    cySparx: float,
+    cw: bool, 
+    last: str,
+    coin_sup_gauche: Tuple[float, float],
+    coin_inf_droite: Tuple[float, float],
+    depSparx: float
+) -> Tuple[float, float, str]:   
+    """
+    Calculate Sparx enemy movement along the game area boundaries.
+    
+    Handles Sparx AI movement logic, making them follow the perimeter
+    of the safe zone in clockwise or counter-clockwise direction.
+    
+    Args:
+        cxSparx: Current Sparx x-coordinate
+        cySparx: Current Sparx y-coordinate  
+        cw: Movement direction (True for clockwise, False for counter-clockwise)
+        last: Last movement direction taken ("haut", "bas", "gauche", "droite")
+        coin_sup_gauche: Top-left corner of game area
+        coin_inf_droite: Bottom-right corner of game area
+        depSparx: Sparx movement speed/distance
+        
+    Returns:
+        Tuple of (dx, dy, new_direction) for Sparx movement
+    """
 
 #           Le code qui suit est très moche (et le Sparx qui tourne dans le sens inverse des aiguilles d'une montre ne fonctionne pas bien,
 #           j'ai des problèmes avec ses déplacements, donc j'ai préféré lui retirer le fait de tenter d'aller dans la zone
@@ -134,17 +251,17 @@ def mouvement_sparx(cxSparx: float, cySparx: float, cw, last) :
     gauche = coin_sup_gauche[0]     # Coordonnée X de la limite latérale gauche de la ZdJ
     droite = coin_inf_droite[0]     # Coordonnée X de la limite latérale droite de la ZdJ
 
-    inleft = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx-depSparx, cySparx)              # Test pour savoir si la position à gauche          du Sparx est dans la zone capturée
-    inright = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx+depSparx, cySparx)             # Test pour savoir si la position à droite          du Sparx est dans la zone capturée
-    inup = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx, cySparx-depSparx)                # Test pour savoir si la position au-dessus         du Sparx est dans la zone capturée
-    indown = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx, cySparx+depSparx)              # Test pour savoir si la position en-dessous        du Sparx est dans la zone capturée
-    inbg = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx-depSparx, cySparx+depSparx)       # Test pour savoir si la position en bas à gauche   du Sparx est dans la zone capturée
-    inbd = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx+depSparx, cySparx+depSparx)       # Test pour savoir si la position en bas à droite   du Sparx est dans la zone capturée
-    inhg = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx-depSparx, cySparx-depSparx)       # Test pour savoir si la position en haut à gauche  du Sparx est dans la zone capturée
-    inhd = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx+depSparx, cySparx-depSparx)       # Test pour savoir si la position haut à droite     du Sparx est dans la zone capturée
+    # inleft = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx-depSparx, cySparx)              # Test pour savoir si la position à gauche          du Sparx est dans la zone capturée
+    # inright = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx+depSparx, cySparx)             # Test pour savoir si la position à droite          du Sparx est dans la zone capturée
+    # inup = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx, cySparx-depSparx)                # Test pour savoir si la position au-dessus         du Sparx est dans la zone capturée
+    # indown = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx, cySparx+depSparx)              # Test pour savoir si la position en-dessous        du Sparx est dans la zone capturée
+    # inbg = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx-depSparx, cySparx+depSparx)       # Test pour savoir si la position en bas à gauche   du Sparx est dans la zone capturée
+    # inbd = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx+depSparx, cySparx+depSparx)       # Test pour savoir si la position en bas à droite   du Sparx est dans la zone capturée
+    # inhg = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx-depSparx, cySparx-depSparx)       # Test pour savoir si la position en haut à gauche  du Sparx est dans la zone capturée
+    # inhd = not test_interieur_safezone(lst_coordonnees_polygones, cxSparx+depSparx, cySparx-depSparx)       # Test pour savoir si la position haut à droite     du Sparx est dans la zone capturée
 
-    h,b = cySparx >= haut+depSparx, cySparx <= bas-depSparx
-    g, d = cxSparx >= gauche+depSparx, cxSparx <= droite-depSparx
+    # h,b = cySparx >= haut+depSparx, cySparx <= bas-depSparx
+    # g, d = cxSparx >= gauche+depSparx, cxSparx <= droite-depSparx
 
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -322,7 +439,7 @@ def mouvement_sparx(cxSparx: float, cySparx: float, cw, last) :
                 last = "left"
             elif cySparx == haut and cw is False :
                 dySparx = depSparx
-                last = "haut"
+                last = "down"
             else :
                 dySparx = depSparx
                 last = "down"
@@ -364,451 +481,547 @@ def mouvement_sparx(cxSparx: float, cySparx: float, cw, last) :
 
 
 
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-#   *                                                                   *
-#   *                           Code Principal                          *
-#   *                                                                   *
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+def main() -> None:
+    """
+    Main game function that runs the QIX game.
+    """
 
-if __name__ == "__main__" :
-
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-    #   *                                                                   *
-    #   *                               Menu                                *
-    #   *                                                                   *
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-
-    cree_fenetre(largeurFenetre, hauteurFenetre)
-    lst_variantes = []
-    # les variables dans l'ordre :
-    # obstacles, pommes, vies, nivInit, vitLent, vitRap, vitQIX, vitSp, aCapt, QIXSize, PlayerSize, vitQIX+, vitSp+, niv+, aCapt+
-    lst_options = [5, 3, 3, 1, 5, 10, 1, 0.75, 75, 10, 10, 0.25, 0.125, 5, 1]
+    # Initialisation de la fenêtre et des variables de configuration
+    cree_fenetre(WIDTH, HEIGHT)
+    lst_variantes: Set[str] = set()
     
-    # les variables dans l'ordre :
-    # monter1, gauche1, bas1, droite1, lent1, rapide1, monter2, gauche2, bas2, droite2, lent2, rapide2
-    lst_touches = ["Up", "Left", "Down", "Right", "Control_R", "Return", "z", "q", "s", "d", "a", "Shift_L"]
-    variable = menu_principal(largeurFenetre, hauteurFenetre, path)
-    while variable != None :
-        efface_tout()
-        if variable == "Principal" :
-            variable = menu_principal(largeurFenetre, hauteurFenetre, path)
-        elif variable == "Variantes" :
-            variable, lst_variantes = menu_variantes(largeurFenetre, hauteurFenetre, path, lst_variantes)
-        elif variable == "Parametres" :
-            while variable != None and variable != "Principal" :
-                efface_tout()
-                if variable == "Parametres" :
-                    variable = menu_parametres(largeurFenetre, hauteurFenetre, path)
-                elif variable == "Options" :
-                    variable, lst_options = menu_options(largeurFenetre, hauteurFenetre, path, lst_options)
-                elif variable == "Touches" :
-                    variable, lst_touches = menu_touches(largeurFenetre, hauteurFenetre, path, lst_touches)
-        elif variable == "Commencer" :
-            efface_tout()
-            break
+    options = {
+        'obstacles': 5,
+        'pommes': 3,
+        'vies': 3,
+        'nivInit': 1,
+        'vitLent': 5,
+        'vitRap': 10,
+        'vitQIX': 1,
+        'vitSp': 0.75,
+        'aCapt': 75,
+        'QIXSize': 10,
+        'PlayerSize': 10,
+        'vitQIX+': 0.25,
+        'vitSp+': 0.125,
+        'niv+': 5,
+        'aCapt+': 1
+    }
     
-    if variable == None :
+    keys = {
+        'monter1': 'Up',
+        'gauche1': 'Left',
+        'bas1': 'Down',
+        'droite1': 'Right',
+        'lent1': 'Control_R',
+        'rapide1': 'Return',
+        'monter2': 'z',
+        'gauche2': 'q',
+        'bas2': 's',
+        'droite2': 'd',
+        'lent2': 'a',
+        'rapide2': 'Shift_L'
+    }
+
+    start: bool = menu_controller(lst_variantes, options, keys)
+    if not start :
         ferme_fenetre()
-    else :
-
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-    #   *               Mise en place des différents éléments               *
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-
-
-
+        return
+    
     #   ========= Définition de la zone de jeu =========
+  
+    zonetot: float = 0     # Ratio entre les zones capturées par les joueurs et le terrain de jeu
+    nbVies: int = int(options['vies'])
+    niveau: int = int(options['nivInit'])
+    zone_a_capture: float = options['aCapt'] + options['aCapt+'] * (niveau // int(options['niv+']))
+    score: Optional[int] = 0 if "Score" in lst_variantes else None
 
-        zonetot = 0     # Ratio entre les zones capturées par les joueurs et le terrain de jeu
-        nbVies = lst_options[2]
-        niveau = lst_options[3]
-        zone_a_capture = lst_options[8] + lst_options[-1] * (niveau // lst_options[-2])
-        score = 0 if "Score" in lst_variantes else None
+    coin_sup_gauche, coin_inf_droite = start_game(zonetot, zone_a_capture, nbVies, niveau, score)
+    dessiner = False
 
-        coin_sup_gauche, coin_inf_droite = ecran_launch(zonetot, zone_a_capture, nbVies, niveau, score)
+    # Délai entre les déplacements du QIX
+    nb_delai = 10
 
-        Perdu = False
-        dessiner = False
-        nb_delai = 10                   
-        # Nombre qui indique le délai entre les déplacements du QIX
+    # Incrémente à chaque exécution d'une boucle
+    a = 0
 
-        a = 0
-        # Nombre qui incrémente à chaque exécution d'une boucle
 
-        cx, cy, rayon = largeurFenetre // 2, coin_inf_droite[1], lst_options[10] // 2   #  -   -   -   -   -   -   -   Taille et position du curseur
-        curseur(cx, cy, rayon)
 
+    #   ========= Définition du Joueur =========
+    cx: float = WIDTH / 2
+    cy: float = coin_inf_droite[1]
+    rayon: float = options['PlayerSize'] / 2
+    draw_player(cx, cy, rayon)
 
     #   ========= Définition du Qix =========
-
-
-        cxQIX = largeurFenetre // 2                   
-        cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
-        carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX")
-
+    cxQIX: float = WIDTH / 2
+    cyQIX: float = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
+    draw_square(cxQIX - options['QIXSize'] / 2, cyQIX - options['QIXSize'] / 2, options['QIXSize'], "Red", "Red", "QIX")
 
     #   ========= Définition des Sparx =========
-
-
-        cxSparx1, cxSparx2 = largeurFenetre // 2, largeurFenetre // 2
-        cySparx1, cySparx2 = coin_sup_gauche[1], coin_sup_gauche[1] 
-        coor_spx1, coor_spx2 = [500,175], [500,175] 
-        sparx1 = sparx(cxSparx1, cySparx1)     # -   Sparx 1
-        sparx2 = sparx(cxSparx2, cySparx2)     # -   Sparx 2
-
+    cxSparx1: float = float(WIDTH // 2)
+    cxSparx2: float = float(WIDTH // 2)
+    cySparx1: float = float(coin_sup_gauche[1])
+    cySparx2: float = float(coin_sup_gauche[1])
+    coor_spx1: Tuple[float, float] = (500, 175)
+    coor_spx2: Tuple[float, float] = (500, 175)
+    draw_sparx(cxSparx1, cySparx1)     # -   Sparx 1
+    draw_sparx(cxSparx2, cySparx2)     # -   Sparx 2
 
     #   ========= Liste des coordonnées =========
 
-        lst_coordonnees_curseur = []
-        # Liste des coordonnées des cases où le curseur est passé
+    # Liste des coordonnées des cases où le curseur est passé
+    lst_coordonnees_curseur: List[Tuple[float, float]] = []
+    
+    # Liste des sommets que le joueur n'a pas encore capturé
+    lst_coordonnees_safezone: List[Tuple[float, float]] = [
+        (coin_inf_droite[0], coin_sup_gauche[1]),
+        (coin_sup_gauche[0], coin_sup_gauche[1]),
+        (coin_sup_gauche[0], coin_inf_droite[1]),
+        (coin_inf_droite[0], coin_inf_droite[1]),
+        (coin_inf_droite[0], coin_sup_gauche[1]),
+        (coin_sup_gauche[0], coin_sup_gauche[1])
+    ]
 
-        lst_coordonnees_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche]
-        # Liste des sommets que le joueur n'a pas encore capturé
+    # Coordonnées des différents polygones formés par le joueur
+    lst_coordonnees_polygones: List[List[Tuple[float, float]]] = [
+        [
+            (coin_sup_gauche[0], coin_sup_gauche[1]),
+            (coin_inf_droite[0], coin_sup_gauche[1]),
+            (coin_inf_droite[0], coin_inf_droite[1]),
+            (coin_sup_gauche[0], coin_inf_droite[1])
+        ]
+    ]
+    
+    # Coordonnée de la case où le joueur sort de la bordure
+    coordonnees_debut: Optional[Tuple[float, float]] = None
 
-        lst_coordonnees_polygones = [[coin_sup_gauche,[coin_inf_droite[0],coin_sup_gauche[1]],coin_inf_droite,[coin_sup_gauche[0],coin_inf_droite[1]]]]
-        # Coordonnées des différents polygones formés par le joueur
+    # Coordonnées qui sont supprimées de la safezone lors de l'exécution de la fonction concatenation_safezone
+    coordonnees_supprime: Optional[List[Tuple[float, float]]] = None
+    
+    # Coordonnées au début (ou à la fin) de la safezone uniquement utile pour la fonction debut_egal_fin
+    coordonnees_debut_safezone: List[Tuple[float, float]] = [
+      (coin_inf_droite[0], coin_sup_gauche[1]),
+      (coin_sup_gauche[0], coin_sup_gauche[1])
+    ]
 
-        coordonnees_debut = []
-        # Coordonnée de la case où le joueur sort de la bordure
+    # Coordonnées des obstacles et des pommes
+    lst_obstacles: Optional[List[Tuple[float, float]]] = None
+    lst_pommes: Optional[List[Tuple[float, float]]] = None
 
-        coordonnees_supprime = None
-        # Coordonnées qui sont supprimées de la safezone lors de l'exécution de la fonction concatenation_safezone
+    if "Obstacles" in lst_variantes :
+        lst_obstacles = creation_obstacles(options['obstacles'], coin_sup_gauche, coin_inf_droite)
 
-        coordonnees_debut_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche]
-        # Coordonnées au début (ou à la fin) de la safezone uniquement utile pour la fonction debut_egal_fin
+    if "Bonus" in lst_variantes :
+        lst_pommes = creation_pommes(options['pommes'], coin_sup_gauche, coin_inf_droite)
 
-        if "Obstacles" in lst_variantes :
-            lst_obstacles = creation_obstacles(lst_options[0])
+    # Game constants
+    QIX_SIZE_HALF: float = options['QIXSize'] / 2
+    
+    # Initialize zone calculation total area
+    try:
+        zonemax: float = aire([
+            (coin_inf_droite[0], coin_sup_gauche[1]),
+            coin_sup_gauche,
+            (coin_sup_gauche[0], coin_inf_droite[1]),
+            coin_inf_droite,
+            (coin_inf_droite[0], coin_sup_gauche[1]),
+            coin_sup_gauche],
+            True
+        )
+    except (ValueError, ZeroDivisionError):
+        print("Error calculating initial zone area, using default")
+        zonemax = (coin_inf_droite[0] - coin_sup_gauche[0]) * (coin_inf_droite[1] - coin_sup_gauche[1])
+    
+    # Vitesse de déplacement du Joueur
+    
+    dep: float = options['vitLent']
+    
+    # Vitesse de déplacement du QIX
+    depQIX: float = options['vitQIX'] + options['vitQIX+'] * (niveau - 1)
 
-        # Coordonnées des obstacles
+    # Vitesse de déplacement des Sparx
+    depSparx: float = options['vitSp'] + options['vitSp+'] * (niveau - 1)
+    
+    perdu: bool = False
+    obstacle: bool = False
 
-        if "Bonus" in lst_variantes :
-            lst_pommes = creation_pommes(lst_options[1])
-
-
-        zonemax = aire([[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[800,175],coin_sup_gauche], True)
-        # Aire total de la zone de jeu
-
-        dep = lst_options[4]
-        # Vitesse de déplacement du Joueur
-
-        depQIX = lst_options[6] + lst_options[11] * (niveau - 1)
-        # Vitesse de déplacement du QIX
-
-        depSparx = lst_options[7] + lst_options[12] * (niveau - 1)
-        # Vitesse de déplacement des Sparx
-
-        obstacle = False
-
-
-
-    #   .   .   .   .   .   Variables à initialiser .   .   .   .   .
-
-
-        back,limite_d = "",""
-        b = 0
-        last1, last2 = "",""
-        
-
-
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-    #   *                                Qix                                *
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-
-
-        # Les déplacements seront changés, pas assez aléatoire et le Qix a tendance à ne pas beaucoup bouger d'un endroit
-
-        while True :
-            if a % nb_delai == 0 :
-                a = 0
-                dxQIX = 0
-                dyQIX = 0
-                change = 5
-                b += 1
-                card = ["nord","sud","est","ouest"]
-                if b%change == 0 :         # Choisis la direction aléatoirement, en faisant que celle-ci ne change qu'une fois sur deux
-                    b = 0
-                    limite_d = card[randint(0,3)]
-
-                if change is False :    # Inverse le booléen "change"
-                    change = True
-                else :
-                    change = False
-
-                for i in range(randint(1, 10)) :
-                    x = randint(0, 6)
-
-                    # voir à modifier le déplacement du qix avec du sin et du pi
-                    if x == 1 :
-                        if limite_d == "nord" :
-                            dyQIX = max(-depQIX, coin_sup_gauche[1]-10 - cyQIX)                       # Déplacement -> Nord
-                        if limite_d == "sud" :
-                            dyQIX = min(depQIX, coin_inf_droite[1]+10 - cyQIX)                        # Déplacement -> Sud
-                        if limite_d == "est" :
-                            dxQIX = min(depQIX, coin_inf_droite[0]+10 - cxQIX)                        # Déplacement -> Est
-                        if limite_d == "ouest" :
-                            dxQIX = max(-depQIX, coin_sup_gauche[0]-10 - cxQIX)                       # Déplacement -> Ouest
-                    elif x == 2 :
-                        if limite_d != "nord" or limite_d == "est" :
-                            dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]+10 - cxQIX))       # Déplacement -> Nord-Est
-                            dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1]-10 - cyQIX))
-                        if limite_d == "sud" or limite_d == "ouest" :
-                            dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0]-10 - cxQIX))      # Déplacement -> Sud-Ouest
-                            dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1]+10 - cyQIX))
-                    elif x == 3 :
-                        if limite_d == "nord" or limite_d == "ouest" :
-                            dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0]-10 - cxQIX))      # Déplacement -> Nord-Ouest
-                            dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1]-10 - cyQIX))
-                        if limite_d == "sud" or limite_d == "est" :
-                            dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0]+10 - cxQIX))       # Déplacement -> Sud-Est
-                            dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1]+10 - cyQIX))
-                    if cxQIX + dxQIX > coin_inf_droite[0] or cxQIX + dxQIX < coin_sup_gauche[0] or cyQIX + dyQIX > coin_inf_droite[1] or cyQIX + dyQIX < coin_sup_gauche[1] :
-                        break
-                    
-                    if dxQIX != 0 or dyQIX != 0 :
-                        if test_interieur_safezone([lst_coordonnees_safezone],cxQIX,cyQIX):
-                            cxQIX += -dxQIX
-                            cyQIX += -dyQIX
-                            efface("QIX")
-                            carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX")
-
-                        else :
-                            cxQIX += dxQIX
-                            cyQIX += dyQIX
-                            efface("QIX")
-                            carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX")
-                    
-
-
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-    #   *                               Sparx                               *
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-
-
-            #mouvement_sparx(coorX_du_sparx,coorY_du_sparx,[sens horaire ?], dernier_mouv)
-
-
-            dxSparx1, dySparx1 = 0, 0
-            dxSparx1, dySparx1, last1 = mouvement_sparx(cxSparx1, cySparx1, True, last1)
-            cxSparx1 += dxSparx1
-            cySparx1 += dySparx1
-
-            dxSparx2, dySparx2, last2 = mouvement_sparx(cxSparx2, cySparx2, False, last2)
-            cxSparx2 += dxSparx2
-            cySparx2 += dySparx2
-
-
-            efface("Sparx")
-            sparx1 = sparx(cxSparx1, cySparx1)
-            sparx2 = sparx(cxSparx2, cySparx2)
-
-
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-    #   *                              Joueur                               *
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-
-
-            ev = donne_ev()
-            tev = type_ev(ev)
-            dx = 0
-            dy = 0
-
-            if touche_pressee(lst_touches[1]):
-                dx = max(-dep, coin_sup_gauche[0] - cx)
-            elif touche_pressee(lst_touches[3]):
-                dx = min(dep, coin_inf_droite[0] - cx)
-            elif touche_pressee(lst_touches[2]):
-                dy = min(dep, coin_inf_droite[1] - cy)
-            elif touche_pressee(lst_touches[0]):
-                dy = max(-dep, coin_sup_gauche[1] - cy)
+    # Game state variables
+    back: str = ""
+    direction_limit: str = ""
+    direction_counter: int = 0
+    last_sparx1_direction: str = ""
+    last_sparx2_direction: str = ""
+    
+    # Constants
+    DIRECTION_CHANGE_INTERVAL: int = 5
+    QIX_BOUNDARY_OFFSET: float = 10.0
+    COLLISION_TOLERANCE: float = 5.0
+    
+    while True:
+        if a % nb_delai == 0:
+            a = 0
+            dxQIX = 0
+            dyQIX = 0
+            direction_counter += 1
+            cardinal_directions = ["nord", "sud", "est", "ouest"]
             
-            if touche_pressee(lst_touches[5]) and "Vitesse" in lst_variantes :
-                if coordonnees_debut == [] :    # Toggle pour savoir si le joueur dessine ou pas
-                    dep = lst_options[5]
-                    draw(1)
-                    dessiner = True
-            
-            if touche_pressee(lst_touches[4]) :
-                if coordonnees_debut == [] :
-                    dep = lst_options[4]
-                    draw(2)
-                    dessiner = True
+            if direction_counter % DIRECTION_CHANGE_INTERVAL == 0:
+                direction_counter = 0
+                direction_limit = cardinal_directions[random.randint(0, 3)]
 
-            if dx != 0 or dy != 0 :
-                efface('curseur')
-                Perdu = test_perte(coordonnees_debut, [cx+dx, cy+dy], [cxQIX-lst_options[9], cyQIX-lst_options[9]], lst_options[10], lst_coordonnees_curseur)
-                cx += dx
-                cy += dy
+            for i in range(random.randint(1, 10)) :
+                x = random.randint(0, 6)
 
-                if "Obstacles" in lst_variantes :
-                    for e in lst_obstacles : # type: ignore
-                        if encadrement_deux_sens(e[0], cx, e[0] + 10) and encadrement_deux_sens(e[1], cy, e[1]+10) :
-                            cx = cx - dx
-                            cy = cy - dy
-                            obstacle = True
-                            break
-
+                # QIX movement with trigonometric calculations
+                if x == 1:
+                    if direction_limit == "nord":
+                        dyQIX = max(-depQIX, coin_sup_gauche[1] - QIX_BOUNDARY_OFFSET - cyQIX)  # Movement -> North
+                    elif direction_limit == "sud":
+                        dyQIX = min(depQIX, coin_inf_droite[1] + QIX_BOUNDARY_OFFSET - cyQIX)   # Movement -> South
+                    elif direction_limit == "est":
+                        dxQIX = min(depQIX, coin_inf_droite[0] + QIX_BOUNDARY_OFFSET - cxQIX)   # Movement -> East
+                    elif direction_limit == "ouest":
+                        dxQIX = max(-depQIX, coin_sup_gauche[0] - QIX_BOUNDARY_OFFSET - cxQIX)  # Movement -> West
+                elif x == 2:
+                    if direction_limit in ["nord", "est"]:
+                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0] + QIX_BOUNDARY_OFFSET - cxQIX))  # Movement -> Northeast
+                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1] - QIX_BOUNDARY_OFFSET - cyQIX))
+                    elif direction_limit in ["sud", "ouest"]:
+                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0] - QIX_BOUNDARY_OFFSET - cxQIX))  # Movement -> Southwest
+                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1] + QIX_BOUNDARY_OFFSET - cyQIX))
+                elif x == 3:
+                    if direction_limit in ["nord", "ouest"]:
+                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0] - QIX_BOUNDARY_OFFSET - cxQIX))  # Movement -> Northwest
+                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1] - QIX_BOUNDARY_OFFSET - cyQIX))
+                    elif direction_limit in ["sud", "est"]:
+                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0] + QIX_BOUNDARY_OFFSET - cxQIX))   # Movement -> Southeast
+                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1] + QIX_BOUNDARY_OFFSET - cyQIX))
+                if cxQIX + dxQIX > coin_inf_droite[0] or cxQIX + dxQIX < coin_sup_gauche[0] or cyQIX + dyQIX > coin_inf_droite[1] or cyQIX + dyQIX < coin_sup_gauche[1] :
+                    break
                 
-                if dessiner and not obstacle :
-                
-                    if coordonnees_debut == [] :  # Test pour savoir si le joueur est sur une bordure
-                        coordonnees_debut = test_sortie_safezone(lst_coordonnees_safezone, cx, cy, dx, dy, dep)          # Test pour savoir si le joueur sort d'une bordure
-                        if coordonnees_debut != [] :
-                            if test_interieur_safezone([lst_coordonnees_safezone],cx,cy) :   # Test pour savoir si le joueur sort vers la zone de jeu
-                                ligne(cx - dx, cy - dy, cx, cy, "Gold", tag = "Trainée")
-                                lst_coordonnees_curseur.append([cx, cy])
-                            else :  # Si le joueur ne va pas vers la zone de jeu, il faut annuler le mouvement
-                                cx = cx - dx
-                                cy = cy - dy
-                                coordonnees_debut = []
+                if dxQIX != 0 or dyQIX != 0 :
+                    if test_interieur_safezone([lst_coordonnees_safezone],cxQIX,cyQIX):
+                        cxQIX += -dxQIX
+                        cyQIX += -dyQIX
+                        efface("QIX")
+                        draw_square(cxQIX - options['QIXSize'] / 2, cyQIX - options['QIXSize'] / 2, options['QIXSize'],"Red","Red","QIX")
 
                     else :
-                        lst_coordonnees_curseur.append([cx, cy])
-                        ligne(cx - dx, cy - dy, cx, cy, "Gold", tag = "Trainée")
-                        if Perdu == True :
-                            pass
-                        elif test_entree_safezone(lst_coordonnees_safezone,cx,cy) :       # Test pour savoir si le joueur entre dans la safezone
-                            lst_coordonnees_curseur.insert(0, coordonnees_debut)        # Insertion de la première coordonnée du polygone formé par le joueur
-                            lst_coordonnees_curseur = sommets(lst_coordonnees_curseur)  # Fonction pour réduire le nombre de coordonnées dans lst_coordonnees_curseur
-                            lst_coordonnees_curseur = cw_a_ccw(lst_coordonnees_curseur) # Fonction pour faire en sorte que les coordonnées du polygone formé par le joueur soit dans le sens contraine de l'aiguille d'une montre (ccw)
-                            lst_coordonnees_safezone, coordonnees_supprime = concatenation_safezone(lst_coordonnees_safezone, lst_coordonnees_curseur)  # Ajout et suppression des coordonnées de la safezone
+                        cxQIX += dxQIX
+                        cyQIX += dyQIX
+                        efface("QIX")
+                        draw_square(cxQIX - options['QIXSize'] / 2, cyQIX - options['QIXSize'] / 2, options['QIXSize'],"Red","Red","QIX")
 
-                            if coordonnees_supprime != None :   # Pour ne pas écraser les polygones précedemment faits par le joueur
-                                lst_coordonnees_curseur = lst_coordonnees_curseur + coordonnees_supprime
 
-                            couleur = "green" if dep == lst_options[5] else "dark blue"
+        dxSparx1, dySparx1 = 0, 0
+        dxSparx1, dySparx1, last_sparx1_direction = mouvement_sparx(
+            cxSparx1,
+            cySparx1,
+            True,
+            last_sparx1_direction,
+            coin_sup_gauche, 
+            coin_inf_droite,
+            depSparx
+        )
+        cxSparx1 += dxSparx1
+        cySparx1 += dySparx1
 
-                            if test_interieur_safezone([lst_coordonnees_safezone],cxQIX, cyQIX) :   # Si le QIX est à l'intérieur du polygone, le reste de la zone est capturé
-                                polygone(lst_coordonnees_curseur, "white", couleur, tag = "ZoneC")
+        dxSparx2, dySparx2, last_sparx2_direction = mouvement_sparx(
+            cxSparx2,
+            cySparx2,
+            False,
+            last_sparx2_direction,
+            coin_sup_gauche, 
+            coin_inf_droite,
+            depSparx
+        )
+        cxSparx2 += dxSparx2
+        cySparx2 += dySparx2
+
+
+        efface("Sparx")
+        draw_sparx(cxSparx1, cySparx1)
+        draw_sparx(cxSparx2, cySparx2)
+
+
+#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+#   *                              Joueur                               *
+#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+
+
+        # Player movement input handling
+        ev = donne_ev()
+        tev = type_ev(ev)
+        dx: float = 0
+        dy: float = 0
+
+        # Directional movement
+        if touche_pressee(keys['gauche1']):
+            dx = max(-dep, coin_sup_gauche[0] - cx)
+        elif touche_pressee(keys['droite1']):
+            dx = min(dep, coin_inf_droite[0] - cx)
+        elif touche_pressee(keys['bas1']):
+            dy = min(dep, coin_inf_droite[1] - cy)
+        elif touche_pressee(keys['monter1']):
+            dy = max(-dep, coin_sup_gauche[1] - cy)
+        
+        # Speed control (if variant enabled)
+        if touche_pressee(keys['rapide1']) and "Vitesse" in lst_variantes:
+            if coordonnees_debut is None:  # Toggle for drawing mode
+                dep = options['vitRap']
+                draw_status(1)
+                dessiner = True
+        
+        if touche_pressee(keys['lent1']):
+            if coordonnees_debut is None:
+                dep = options['vitLent']
+                draw_status(2)
+                dessiner = True
+
+        # Process player movement
+        if dx != 0 or dy != 0:
+            efface('curseur')
+            
+            # Test for collision with QIX - fix: use center coordinates and correct size
+            perdu = test_perte(
+                coordonnees_debut, # type: ignore
+                (cx + dx, cy + dy),
+                (cxQIX, cyQIX),  # Use center coordinates, not offset
+                options['QIXSize'],  # Use QIX size, not capture area
+                lst_coordonnees_curseur
+            )
+
+            cx += dx
+            cy += dy
+
+            # Obstacle collision detection
+            if lst_obstacles is not None:
+                for obstacle_pos in lst_obstacles:
+                    if (encadrement_deux_sens(obstacle_pos[0], cx, obstacle_pos[0] + 10) and 
+                        encadrement_deux_sens(obstacle_pos[1], cy, obstacle_pos[1] + 10)):
+                        cx = cx - dx
+                        cy = cy - dy
+                        obstacle = True
+                        break
+
+            
+            # Drawing logic when not hitting obstacles
+            if dessiner and not obstacle:
+                if coordonnees_debut is None:  # Test if player is on border
+                    # Test if player exits safe zone
+                    coordonnees_debut = test_sortie_safezone(
+                        lst_coordonnees_safezone, cx, cy, dx, dy, dep
+                    )
+                    
+                    if coordonnees_debut is not None:
+                        # Test if player moves toward game zone
+                        if test_interieur_safezone([lst_coordonnees_safezone], cx, cy):
+                            ligne(cx - dx, cy - dy, cx, cy, "Gold", tag="Trainée")
+                            lst_coordonnees_curseur.append((cx, cy))
+                        else:  # Cancel movement if not going toward game zone
+                            cx = cx - dx
+                            cy = cy - dy
+                            coordonnees_debut = None
+                else:
+                    lst_coordonnees_curseur.append((cx, cy))
+                    ligne(cx - dx, cy - dy, cx, cy, "Gold", tag = "Trainée")
+                    if perdu == True :
+                        pass
+                    elif test_entree_safezone(lst_coordonnees_safezone,int(cx),int(cy)) :       # Test pour savoir si le joueur entre dans la safezone
+                        lst_coordonnees_curseur.insert(0, coordonnees_debut)        # Insertion de la première coordonnée du polygone formé par le joueur
+                        lst_coordonnees_curseur = sommets(lst_coordonnees_curseur)  # Fonction pour réduire le nombre de coordonnées dans lst_coordonnees_curseur
+                        lst_coordonnees_curseur = cw_a_ccw(lst_coordonnees_curseur) # Fonction pour faire en sorte que les coordonnées du polygone formé par le joueur soit dans le sens contraine de l'aiguille d'une montre (ccw)
+                        lst_coordonnees_safezone, coordonnees_supprime = concatenation_safezone(lst_coordonnees_safezone, lst_coordonnees_curseur)  # Ajout et suppression des coordonnées de la safezone
+
+                        if coordonnees_supprime is not None:  # Preserve previously drawn polygons
+                            lst_coordonnees_curseur = lst_coordonnees_curseur + coordonnees_supprime
+
+                        # Zone capture logic with error handling
+                        try:
+                            couleur = "green" if dep == options['vitRap'] else "dark blue"
+
+                            # Check if QIX is inside the captured zone
+                            if test_interieur_safezone([lst_coordonnees_safezone], cxQIX, cyQIX):
+                                polygone(lst_coordonnees_curseur, "white", couleur, tag="ZoneC")
                                 lst_coordonnees_polygones.append(lst_coordonnees_curseur)
-                            else :
-                                polygone(lst_coordonnees_safezone, "white", couleur, tag = "ZoneC")
+                            else:
+                                polygone(lst_coordonnees_safezone, "white", couleur, tag="ZoneC")
                                 lst_coordonnees_polygones.append(lst_coordonnees_safezone)
                                 lst_coordonnees_safezone = list(lst_coordonnees_curseur)
 
-                            lst_coordonnees_safezone, coordonnees_debut_safezone = debut_egal_fin(lst_coordonnees_safezone, coordonnees_debut_safezone) # Modification des 2 premiers ou derniers éléments de la safezone pour qu'elles soient les mêmes
+                            lst_coordonnees_safezone, coordonnees_debut_safezone = debut_egal_fin(
+                                lst_coordonnees_safezone, coordonnees_debut_safezone
+                            )
                             lst_coordonnees_safezone = sommets(lst_coordonnees_safezone)
 
-                            zonetot = ((zonemax - aire(lst_coordonnees_safezone,True)) / zonemax) * 100   # Calcul de l'aire
-                            if score != None :
+                            # Calculate area with error handling
+                            safe_zone_area = aire(lst_coordonnees_safezone, True)
+                            if zonemax > 0:  # Prevent division by zero
+                                zonetot = ((zonemax - safe_zone_area) / zonemax) * 100
+                            else:
+                                zonetot = 0
+                                
+                            # Update score
+                            if score is not None:
                                 efface("score")
-                                score = score + int((aire(lst_coordonnees_safezone,True)*(15-dep))//10000)
-                            efface("Trainée")
-                            if "Obstacles" in lst_variantes :
-                                efface("obstacles")
-                                for e in lst_obstacles : # type: ignore
-                                    carre(e[0], e[1], 10, "orange", "orange", "obstacles", 1)
-                            efface("Zonecapturee")
-                            lst_coordonnees_curseur = []
-                            coordonnees_debut = []
-                            coordonnees_supprime = None
-                            Perdu = False
-                            update_act(zonetot, score)
-                curseur(cx, cy, rayon)
-                obstacle = False
+                                area_bonus = safe_zone_area * (15 - float(dep))
+                                score = score + int(area_bonus // 10000)
+                                
+                        except (ZeroDivisionError, ValueError) as e:
+                            print(f"Error in zone calculation: {e}")
+                            zonetot = 0
+                            
+                        # Clean up display
+                        efface("Trainée")
+                        if lst_obstacles is not None:
+                            efface("obstacles")
+                            for obstacle_pos in lst_obstacles:
+                                draw_square(obstacle_pos[0], obstacle_pos[1], 10, "orange", "orange", "obstacles", 1)
+                        
+                        # Reset drawing state
+                        efface("Zonecapturee")
+                        lst_coordonnees_curseur = []
+                        coordonnees_debut = None
+                        coordonnees_supprime = None
+                        perdu = False
+                        update_action(zonetot, score)
+            draw_player(cx, cy, rayon)
+            obstacle = False
 
 
 
 
 
-            if encadrement_deux_sens(cxSparx1-5,cx,cxSparx1+5,True,True) and encadrement_deux_sens(cySparx1-5,cy,cySparx1+5,True,True) :    # Si l'un des deux Sparx entre en contact avec le joueur
-                Perdu = True
-            if encadrement_deux_sens(cxSparx2-5,cx,cxSparx2+5,True,True) and encadrement_deux_sens(cySparx2-5,cy,cySparx2+5,True,True) :
-                Perdu = True
-
-
-            if tev == "Quitte" :
+        # Sparx collision detection with player
+        sparx_positions = [(cxSparx1, cySparx1), (cxSparx2, cySparx2)]
+        for sparx_x, sparx_y in sparx_positions:
+            if (encadrement_deux_sens(sparx_x - COLLISION_TOLERANCE, cx, sparx_x + COLLISION_TOLERANCE, True, True) and 
+                encadrement_deux_sens(sparx_y - COLLISION_TOLERANCE, cy, sparx_y + COLLISION_TOLERANCE, True, True)):
+                perdu = True
                 break
 
 
-            mise_a_jour()
+        if tev == "Quitte" :
+            return
+
+
+        mise_a_jour()
+
+
+
+
+
+#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+#   *                        Défaite / Victoire                         *
+#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
     
+        if zonetot >= zone_a_capture:
+            niveau += 1
+            show_level_complete(niveau)
 
+            efface('curseur')
+            cx, cy = WIDTH / 2, coin_inf_droite[1]
+            draw_player(cx, cy, rayon)
 
+            if "Obstacles" in lst_variantes:
+                efface("obstacles")
+                lst_obstacles = creation_obstacles(options['obstacles'], coin_sup_gauche, coin_inf_droite)
 
+            # Level progression - increase difficulty
+            if niveau % options['aCapt+'] == 0:
+                zone_a_capture += options['aCapt+']
 
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-    #   *                        Défaite / Victoire                         *
-    #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+            # Reset and upgrade Sparx
+            efface("Sparx")
+            depSparx += options['vitSp+']
+            cxSparx1, cxSparx2 = WIDTH / 2, WIDTH / 2
+            cySparx1, cySparx2 = coin_sup_gauche[1], coin_sup_gauche[1]
+            draw_sparx(cxSparx1, cySparx1)
+            draw_sparx(cxSparx2, cySparx2)
+
+            # Reset and upgrade QIX
+            efface("QIX")
+            depQIX += options['vitQIX+']
+            cxQIX = WIDTH / 2
+            cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
+            draw_square(cxQIX - QIX_SIZE_HALF, cyQIX - QIX_SIZE_HALF, 
+                       options['QIXSize'], "Red", "Red", "QIX")
+
+            zonetot = 0
+            efface("Zonecapturee")
+            efface("nbVies")
+            efface("Zone_a_capturee")
+            efface("niveau")
+            efface("score")
+            update_action(zonetot, score)
+            update_round(zone_a_capture, nbVies, niveau)
+
+            efface("ZoneC")
         
-            if zonetot >= zone_a_capture :
-                niveau += 1
-                affichage_gagne(niveau)
-
-                efface('curseur')
-                cx, cy = largeurFenetre // 2, coin_inf_droite[1]
-                curseur(cx, cy, rayon)
-
-                if "Obstacles" in lst_variantes :
-                    efface("obstacles")
-                    lst_obstacles = creation_obstacles(lst_options[0])
-
-                if niveau % lst_options[13] == 0 :
-                    zone_a_capture += lst_options[14]
-
-                efface("Sparx")
-                depSparx += lst_options[12]
-                cxSparx1, cxSparx2 = largeurFenetre // 2, largeurFenetre // 2
-                cySparx1, cySparx2 = coin_sup_gauche[1], coin_sup_gauche[1]
-                sparx1 = sparx(cxSparx1, cySparx1)
-                sparx2 = sparx(cxSparx2, cySparx2)
-
-                efface("QIX")
-                depQIX += lst_options[11]
-                cxQIX = largeurFenetre // 2
-                cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
-                carre(cxQIX - lst_options[9] // 2, cyQIX - lst_options[9] // 2, lst_options[9],"Red","Red","QIX")
-
-                zonetot = 0
-                efface("Zonecapturee")
-                efface("nbVies")
-                efface("Zone_a_capturee")
-                efface("niveau")
-                efface("score")
-                update_act(zonetot, score)
-                update_round(zone_a_capture,nbVies,niveau)
-
-                efface("ZoneC")
-            
-                dessiner = False
-                lst_coordonnees_curseur = []
-                coordonnees_debut = []
-                coordonnees_debut_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche]
-                lst_coordonnees_safezone = [[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche,[coin_sup_gauche[0],coin_inf_droite[1]],coin_inf_droite,[coin_inf_droite[0],coin_sup_gauche[1]],coin_sup_gauche]
-                lst_coordonnees_polygones = [[coin_sup_gauche,[coin_inf_droite[0],coin_sup_gauche[1]],coin_inf_droite,[coin_sup_gauche[0],coin_inf_droite[1]]]]
+            dessiner = False
+            lst_coordonnees_curseur = []
+            coordonnees_debut = None
+            coordonnees_debut_safezone = [
+                (coin_inf_droite[0], coin_sup_gauche[1]),
+                (coin_sup_gauche[0], coin_sup_gauche[1])
+            ]
+            lst_coordonnees_safezone = [
+                (coin_inf_droite[0], coin_sup_gauche[1]),
+                (coin_sup_gauche[0], coin_sup_gauche[1]),
+                (coin_sup_gauche[0], coin_inf_droite[1]),
+                (coin_inf_droite[0], coin_inf_droite[1]),
+                (coin_inf_droite[0], coin_sup_gauche[1]),
+                (coin_sup_gauche[0], coin_sup_gauche[1])
+            ]
+            lst_coordonnees_polygones = [
+                [
+                    (coin_sup_gauche[0], coin_sup_gauche[1]),
+                    (coin_inf_droite[0], coin_sup_gauche[1]),
+                    (coin_inf_droite[0], coin_inf_droite[1]),
+                    (coin_sup_gauche[0], coin_inf_droite[1])
+                ]
+            ]
 
 
-            if Perdu == True :
-                nbVies -= 1
-                affichage_perdu(nbVies)
+        if perdu:
+            nbVies -= 1
+            show_game_over(nbVies)
+
+            efface('curseur')
+            if coordonnees_debut is not None:
+                cx, cy = coordonnees_debut[0], coordonnees_debut[1]
+            draw_player(cx, cy, rayon)
+
+            # Reset Sparx positions
+            efface("Sparx")
+            cxSparx1, cxSparx2 = WIDTH / 2, WIDTH / 2
+            cySparx1, cySparx2 = coin_sup_gauche[1], coin_sup_gauche[1]
+            draw_sparx(cxSparx1, cySparx1)
+            draw_sparx(cxSparx2, cySparx2)
+
+
+            # Update game state display
+            efface("nbVies")
+            update_round(zone_a_capture, nbVies, niveau)
+            draw_status(0)
+            dep = 6.0
+
+            # Reset game state
+            dessiner = False
+            lst_coordonnees_curseur = []
+            coordonnees_debut = None
+            perdu = False
+
+            # End game if no lives remaining
+            if nbVies == 0:
+                break
     
-                efface('curseur')
-                if coordonnees_debut != [] :
-                    cx, cy = coordonnees_debut[0], coordonnees_debut[1]
-                curseur(cx, cy, rayon)
-    
-                efface("Sparx")
-                cxSparx1, cxSparx2 = largeurFenetre // 2, largeurFenetre // 2
-                cySparx1, cySparx2 = coin_sup_gauche[1], coin_sup_gauche[1]
-                sparx1 = sparx(cxSparx1, cySparx1)
-                sparx2 = sparx(cxSparx2, cySparx2)
+        a += 1
 
 
-                efface("nbVies")
-                update_round(zone_a_capture,nbVies,niveau)
-                draw(0)
-                dep = 6
+    ferme_fenetre()
 
+if __name__ == "__main__" :
 
-                dessiner = False
-                lst_coordonnees_curseur = []
-                coordonnees_debut = []
-                Perdu = False
-    
-                if nbVies == 0 :
-                    break
-        
-            a += 1
-
-
-        ferme_fenetre()
+    main()
