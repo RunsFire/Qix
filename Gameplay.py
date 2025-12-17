@@ -458,8 +458,7 @@ def main() -> None:
     
     while True:
         # Update QIX position using class-based movement
-        safe_zones = [lst_coordonnees_safezone]
-        cxQIX, cyQIX = qix_movement.update(safe_zones)
+        cxQIX, cyQIX = qix_movement.update(lst_coordonnees_safezone)
             
         # Update QIX visual
         efface("QIX")
@@ -571,7 +570,7 @@ def main() -> None:
                     
                     if coordonnees_debut is not None:
                         # Test if player moves toward game zone
-                        if test_interieur_safezone([lst_coordonnees_safezone], cx, cy):
+                        if test_interieur_safezone(lst_coordonnees_safezone, cx, cy):
                             ligne(cx - dx, cy - dy, cx, cy, "Gold", tag="Trainée")
                             lst_coordonnees_curseur.append((cx, cy))
                         else:  # Cancel movement if not going toward game zone
@@ -597,7 +596,7 @@ def main() -> None:
                             couleur = "green" if dep == options['vitRap'] else "dark blue"
 
                             # Check if QIX is inside the captured zone
-                            if test_interieur_safezone([lst_coordonnees_safezone], cxQIX, cyQIX):
+                            if test_interieur_safezone(lst_coordonnees_safezone, cxQIX, cyQIX):
                                 polygone(lst_coordonnees_curseur, "white", couleur, tag="ZoneC")
                                 lst_coordonnees_polygones.append(lst_coordonnees_curseur)
                             else:

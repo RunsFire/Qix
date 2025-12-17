@@ -43,25 +43,40 @@ class QIXMovement:
         self.trajectory_start_y = self.y
         self.total_trajectory_distance = 0.0  # Will be set when target changes
     
-    def _choose_new_target(self, safe_zones: List[List[Tuple[float, float]]]) -> None:
-        """Choose a new random target avoiding safe zones and randomize arc parameters."""
-        attempts = 0
-        while attempts < 10:
-            new_target_x = random.uniform(self.bounds_top_left[0] + 30, self.bounds_bottom_right[0] - 30)
-            new_target_y = random.uniform(self.bounds_top_left[1] + 30, self.bounds_bottom_right[1] - 30)
+    def _choose_new_target(self, unsafe_zone: List[Tuple[float, float]]) -> None:
+        """Choose a new target avoiding safe zones using simple but effective sampling."""
+        margin = 30
+        
+        for _ in range(8):  # Just 8 attempts
+            new_target_x = random.uniform(self.bounds_top_left[0] + margin, self.bounds_bottom_right[0] - margin)
+            new_target_y = random.uniform(self.bounds_top_left[1] + margin, self.bounds_bottom_right[1] - margin)
             
-            # Avoid targets in safe zone
-            if test_interieur_safezone(safe_zones, new_target_x, new_target_y):
-                self.target_x = new_target_x
-                self.target_y = new_target_y
-                # Reset arc parameters for new trajectory
-                self.arc_direction = random.choice([-1, 1])
-                self.arc_strength = random.uniform(1.5, 2.5)
-                self.trajectory_start_x = self.x
-                self.trajectory_start_y = self.y
-                self.total_trajectory_distance = math.sqrt((self.target_x - self.x)**2 + (self.target_y - self.y)**2)
-                break
-            attempts += 1
+            if test_interieur_safezone(unsafe_zone, new_target_x, new_target_y):
+                self._set_new_target(new_target_x, new_target_y)
+                return
+        
+        # Pick direction from current position
+        angle = random.uniform(0, 2 * math.pi)
+        distance = random.uniform(80, 150)
+        fallback_x = self.x + math.cos(angle) * distance
+        fallback_y = self.y + math.sin(angle) * distance
+        
+        # Clamp to valid bounds
+        fallback_x = max(self.bounds_top_left[0] + margin, min(self.bounds_bottom_right[0] - margin, fallback_x))
+        fallback_y = max(self.bounds_top_left[1] + margin, min(self.bounds_bottom_right[1] - margin, fallback_y))
+        
+        self._set_new_target(fallback_x, fallback_y)
+    
+    def _set_new_target(self, x: float, y: float) -> None:
+        """Set new target and reset arc parameters."""
+        self.target_x = x
+        self.target_y = y
+        # Reset arc parameters for new trajectory
+        self.arc_direction = random.choice([-1, 1])
+        self.arc_strength = random.uniform(1.5, 2.5)
+        self.trajectory_start_x = self.x
+        self.trajectory_start_y = self.y
+        self.total_trajectory_distance = math.sqrt((self.target_x - self.x)**2 + (self.target_y - self.y)**2)
     
     def _update_arc_parameters(self) -> None:
         """Gradually evolve arc parameters for dynamic movement patterns."""
@@ -70,12 +85,12 @@ class QIXMovement:
             self.arc_strength += random.uniform(-0.2, 0.2)
             self.arc_strength = max(1.0, min(3.0, self.arc_strength))
     
-    def update(self, safe_zones: List[List[Tuple[float, float]]]) -> Tuple[float, float]:
+    def update(self, unsafe_zone: List[Tuple[float, float]]) -> Tuple[float, float]:
         """
         Update QIX position and return new coordinates.
         
         Args:
-            safe_zones: List of safe zone coordinate lists to avoid
+            unsafe_zone: List of unsafe zone coordinates to avoid
             
         Returns:
             Tuple of (new_x, new_y) coordinates
@@ -97,7 +112,7 @@ class QIXMovement:
         
         # Change target based on proximity or randomly
         if distance_to_target < 30 or random.random() < change_probability:
-            self._choose_new_target(safe_zones)
+            self._choose_new_target(unsafe_zone)
             # Recalculate after potential target change
             dx_to_target = self.target_x - self.x
             dy_to_target = self.target_y - self.y
@@ -151,8 +166,8 @@ class QIXMovement:
             next_x >= self.bounds_bottom_right[0] - self.boundary_offset or
             next_y <= self.bounds_top_left[1] + self.boundary_offset or 
             next_y >= self.bounds_bottom_right[1] - self.boundary_offset or
-            not test_interieur_safezone(safe_zones, next_x, next_y)):
-            self._choose_new_target(safe_zones)
+            not test_interieur_safezone(unsafe_zone, next_x, next_y)):
+            self._choose_new_target(unsafe_zone)
         
         # Apply movement with boundary constraints
         self.x = max(self.bounds_top_left[0] + self.boundary_offset, 

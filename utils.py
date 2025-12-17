@@ -99,36 +99,65 @@ def test_entree_safezone(lst_safezone: List[Tuple[float, float]], cx: int, cy: i
     return False
 
 
-def test_interieur_safezone(lst_coordonnees: List[List[Tuple[float, float]]], cx: float, cy: float) -> bool:
+def test_interieur_safezone(game_boundary: List[Tuple[float, float]], cx: float, cy: float) -> bool:
     """
-    Test if a point is inside a polygon defined by coordinate lists.
+    Test if a point is inside the current game boundary (unsafe area).
     
-    Uses ray casting algorithm to determine if point (cx, cy) is inside
-    the polygon(s) defined by lst_coordonnees.
+    Instead of checking multiple safe zone polygons, this optimized version checks
+    if the point is inside the single game boundary polygon representing the 
+    current unsafe area where the QIX can move.
     
     Args:
-        lst_coordonnees: Matrix of coordinate lists defining polygon boundaries
+        game_boundary: List of (x, y) coordinates defining the current game boundary
         cx: Point x-coordinate to test
         cy: Point y-coordinate to test
         
     Returns:
-        True if point is inside any polygon, False otherwise
+        True if point is inside the game boundary (unsafe area), False otherwise
     """
-    nb = 0
-    for i in range (len(lst_coordonnees)) :
-        for j in range (len(lst_coordonnees[i])) :
-            if lst_coordonnees[i][j][0] > cx :
-                continue
-            if j == len(lst_coordonnees[i])-1 :
-                if encadrement_deux_sens(lst_coordonnees[i][j][1],cy,lst_coordonnees[i][0][1],True,False) :
-                    nb += 1
-            else :
-                if encadrement_deux_sens(lst_coordonnees[i][j][1],cy,lst_coordonnees[i][j+1][1],True,False) :
-                    nb += 1
-    if nb % 2 == 0 :
+    return _point_in_polygon(game_boundary, cx, cy)
+
+
+
+def _point_in_polygon(polygon: List[Tuple[float, float]], px: float, py: float) -> bool:
+    """
+    Optimized point-in-polygon test using ray casting algorithm.
+    
+    Args:
+        polygon: List of (x, y) coordinates defining the polygon
+        px: Point x-coordinate to test
+        py: Point y-coordinate to test
+        
+    Returns:
+        True if point is inside polygon, False otherwise
+    """
+    if not polygon or len(polygon) < 3:
         return False
-    else :
-        return True
+    
+    # Bounding box quick rejection test
+    min_x = min(point[0] for point in polygon)
+    max_x = max(point[0] for point in polygon) 
+    min_y = min(point[1] for point in polygon)
+    max_y = max(point[1] for point in polygon)
+    
+    if px < min_x or px > max_x or py < min_y or py > max_y:
+        return False
+    
+    # Ray casting algorithm
+    inside = False
+    j = len(polygon) - 1  # Last vertex
+    
+    for i in range(len(polygon)):
+        xi, yi = polygon[i]
+        xj, yj = polygon[j]
+        
+        # Check if ray crosses this edge
+        if ((yi > py) != (yj > py)) and (px < (xj - xi) * (py - yi) / (yj - yi) + xi):
+            inside = not inside
+        
+        j = i  # Move to next edge
+    
+    return inside
     
 
 def creation_obstacles(nb_obstacles: int, coin_sup_gauche: Tuple[float, float], coin_inf_droite: Tuple[float, float]) -> List[Tuple[float, float]]:
