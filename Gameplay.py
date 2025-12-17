@@ -7,204 +7,8 @@ from Interface.menu_controller import menu_controller
 from Interface.const import WIDTH, HEIGHT
 from Interface.utils import draw_player, draw_sparx, draw_square, draw_status, show_game_over, show_level_complete, update_action, update_round
 
-import random
-from math import sin, pi
-
-
-def test_perte(cd_debut: Tuple[float, float], cd_joueur: Tuple[float, float], cd_QIX: Tuple[float, float], cote: float, lst_joueur: List[Tuple[float, float]]) -> bool:
-    """
-    Test if the player loses due to collision with QIX or self-intersection.
-    
-    Args:
-        cd_debut: Starting coordinates of player trail
-        cd_joueur: Current player coordinates  
-        cd_QIX: QIX center coordinates
-        cote: QIX size (width/height)
-        lst_joueur: List of player trail coordinates
-        
-    Returns:
-        True if collision detected, False otherwise
-    """
-    # Check if player returned to starting position
-    if cd_debut == cd_joueur:
-        return True
-    
-    # Calculate QIX bounds from center coordinates
-    qix_half_size = cote / 2
-    qix_left = cd_QIX[0] - qix_half_size
-    qix_right = cd_QIX[0] + qix_half_size
-    qix_top = cd_QIX[1] - qix_half_size
-    qix_bottom = cd_QIX[1] + qix_half_size
-    
-    # Check QIX collision with trail and self-intersection
-    for element in lst_joueur:
-        # Check if QIX collides with any trail point
-        if (qix_left <= element[0] <= qix_right and 
-            qix_top <= element[1] <= qix_bottom):
-            return True
-        # Check for self-intersection
-        if cd_joueur == element:
-            return True
-            
-    return False
-
-
-def test_sortie_safezone(lst_safezone: List[Tuple[float, float]], cx: float, cy: float, dx: float, dy: float, dep: float) -> Optional[Tuple[float, float]]:
-    """
-    Test if the player exits the safe zone and return the exit coordinates.
-    
-    Args:
-        lst_safezone: List of safe zone boundary coordinates
-        cx: Current player x-coordinate
-        cy: Current player y-coordinate
-        dx: Player x-direction movement
-        dy: Player y-direction movement
-        dep: Player movement speed/distance
-        
-    Returns:
-        Coordinates where player exited safe zone, None if player stays in safe zone
-    """
-    for i in range (1, len(lst_safezone)-1) :
-
-        if cx - dx == lst_safezone[i][0] and cy - dy == lst_safezone[i][1] :
-            if  ((encadrement_deux_sens(lst_safezone[i-1][0],cx,lst_safezone[i][0],True,True) and encadrement_deux_sens(lst_safezone[i-1][1],cy,lst_safezone[i][1],True,True))
-            or  (encadrement_deux_sens(lst_safezone[i][0],cx,lst_safezone[i+1][0],True,True) and encadrement_deux_sens(lst_safezone[i][1],cy,lst_safezone[i+1][1],True,True))) :
-                    return
-            else :
-                return (cx - dx, cy - dy)
-          
-        if cy - dy == lst_safezone[i][1] :
-            if encadrement_deux_sens(lst_safezone[i][0],cx-dx,lst_safezone[i+1][0],False,False) :
-                if cy == lst_safezone[i][1] + dep or cy == lst_safezone[i][1] - dep :
-                    return (cx - dx, cy - dy)
-                    
-        elif cx - dx == lst_safezone[i][0] :
-            if encadrement_deux_sens(lst_safezone[i][1],cy-dy,lst_safezone[i+1][1],False,False) :
-                if cx == lst_safezone[i][0] + dep or cx == lst_safezone[i][0] - dep :
-                    return (cx - dx, cy - dy)
-
-
-def test_entree_safezone(lst_safezone: List[Tuple[float, float]], cx: int, cy: int) -> bool:
-    """
-    Test if the player re-enters the safe zone.
-    
-    Args:
-        lst_safezone: List of safe zone boundary coordinates
-        cx: Player x-coordinate
-        cy: Player y-coordinate
-        
-    Returns:
-        True if player enters the safe zone, False otherwise
-    """
-    for i in range (len(lst_safezone)-1) :
-        if (encadrement_deux_sens(lst_safezone[i][0],cx,lst_safezone[i+1][0],True,True)) and cy == lst_safezone[i][1] :
-            return True
-        
-        elif (encadrement_deux_sens(lst_safezone[i][1],cy,lst_safezone[i+1][1],True,True)) and cx == lst_safezone[i][0] :
-            return True
-    return False
-
-
-def test_interieur_safezone(lst_coordonnees: List[List[Tuple[float, float]]], cx: float, cy: float) -> bool:
-    """
-    Test if a point is inside a polygon defined by coordinate lists.
-    
-    Uses ray casting algorithm to determine if point (cx, cy) is inside
-    the polygon(s) defined by lst_coordonnees.
-    
-    Args:
-        lst_coordonnees: Matrix of coordinate lists defining polygon boundaries
-        cx: Point x-coordinate to test
-        cy: Point y-coordinate to test
-        
-    Returns:
-        True if point is inside any polygon, False otherwise
-    """
-    nb = 0
-    for i in range (len(lst_coordonnees)) :
-        for j in range (len(lst_coordonnees[i])) :
-            if lst_coordonnees[i][j][0] > cx :
-                continue
-            if j == len(lst_coordonnees[i])-1 :
-                if encadrement_deux_sens(lst_coordonnees[i][j][1],cy,lst_coordonnees[i][0][1],True,False) :
-                    nb += 1
-            else :
-                if encadrement_deux_sens(lst_coordonnees[i][j][1],cy,lst_coordonnees[i][j+1][1],True,False) :
-                    nb += 1
-    if nb % 2 == 0 :
-        return False
-    else :
-        return True
-    
-
-def creation_obstacles(nb_obstacles: int, coin_sup_gauche: Tuple[float, float], coin_inf_droite: Tuple[float, float]) -> List[Tuple[float, float]]:
-    """
-    Create obstacles and return their coordinate list.
-    
-    Generates the specified number of obstacles randomly positioned within
-    the game area boundaries, avoiding duplicates.
-    
-    Args:
-        nb_obstacles: Number of obstacles to create
-        coin_sup_gauche: Top-left corner coordinates of game area
-        coin_inf_droite: Bottom-right corner coordinates of game area
-        
-    Returns:
-        List of obstacle coordinates (x, y tuples)
-    """
-    lst_obstacles = []
-    nb_cases_abs = (coin_inf_droite[0] - coin_sup_gauche[0]) // 10
-    nb_cases_ord = (coin_inf_droite[1] - coin_sup_gauche[1]) // 10
-    for i in range(nb_obstacles) :
-        x = random.random() * (nb_cases_abs - 2) + 2
-        y = random.random() * (nb_cases_ord - 2) + 2
-        obstacle = [x, y]
-
-        # Vérification pour éviter les doublons
-        while obstacle in lst_obstacles :
-            obstacle = [random.random() * (nb_cases_abs - 2) + 2, random.random() * (nb_cases_ord - 2) + 2]
-
-        # Conversion des coordonnées en pixels
-        obstacle[0] = obstacle[0] * 10 + coin_sup_gauche[0]
-        obstacle[1] = obstacle[1] * 10 + coin_sup_gauche[1]
-        lst_obstacles.append(obstacle)
-        draw_square(lst_obstacles[i][0], lst_obstacles[i][1], 10, "orange", "orange", "obstacles")
-    return lst_obstacles
-
-
-def creation_pommes(nb_pommes: int, coin_sup_gauche: Tuple[float, float], coin_inf_droite: Tuple[float, float]) -> List[Tuple[float, float]]:
-    """
-    Create bonus apples and return their coordinate list.
-    
-    Generates the specified number of bonus apples randomly positioned within
-    the game area boundaries, avoiding duplicates.
-    
-    Args:
-        nb_pommes: Number of bonus apples to create
-        coin_sup_gauche: Top-left corner coordinates of game area
-        coin_inf_droite: Bottom-right corner coordinates of game area
-        
-    Returns:
-        List of apple coordinates (x, y tuples)
-    """
-    lst_pommes = []
-    nb_cases_abs = (coin_inf_droite[0] - coin_sup_gauche[0]) // 10
-    nb_cases_ord = (coin_inf_droite[1] - coin_sup_gauche[1]) // 10
-    for i in range(nb_pommes) :
-        x = random.random() * (nb_cases_abs - 2) + 2
-        y = random.random() * (nb_cases_ord - 2) + 2
-        pomme = [x, y]
-
-        # Vérification pour éviter les doublons
-        while pomme in lst_pommes :
-            pomme = [random.random() * (nb_cases_abs - 2) + 2, random.random() * (nb_cases_ord - 2) + 2]
-
-        # Conversion des coordonnées en pixels
-        pomme[0] = pomme[0] * 10 + coin_sup_gauche[0]
-        pomme[1] = pomme[1] * 10 + coin_sup_gauche[1]
-        lst_pommes.append(pomme)
-        cercle(lst_pommes[i][0], lst_pommes[i][1], 5, "red", "red", tag="pommes", epaisseur=1)
-    return lst_pommes
+from qix import QIXMovement
+from utils import *
 
 
 def mouvement_sparx(
@@ -498,12 +302,12 @@ def main() -> None:
         'vitLent': 5,
         'vitRap': 10,
         'vitQIX': 1,
-        'vitSp': 0.75,
+        'vitSp': 3,
         'aCapt': 75,
         'QIXSize': 10,
         'PlayerSize': 10,
         'vitQIX+': 0.25,
-        'vitSp+': 0.125,
+        'vitSp+': 0.5,
         'niv+': 5,
         'aCapt+': 1
     }
@@ -539,13 +343,9 @@ def main() -> None:
     coin_sup_gauche, coin_inf_droite = start_game(zonetot, zone_a_capture, nbVies, niveau, score)
     dessiner = False
 
-    # Délai entre les déplacements du QIX
-    nb_delai = 10
-
     # Incrémente à chaque exécution d'une boucle
     a = 0
-
-
+    nb_delai = 2
 
     #   ========= Définition du Joueur =========
     cx: float = WIDTH / 2
@@ -563,8 +363,6 @@ def main() -> None:
     cxSparx2: float = float(WIDTH // 2)
     cySparx1: float = float(coin_sup_gauche[1])
     cySparx2: float = float(coin_sup_gauche[1])
-    coor_spx1: Tuple[float, float] = (500, 175)
-    coor_spx2: Tuple[float, float] = (500, 175)
     draw_sparx(cxSparx1, cySparx1)     # -   Sparx 1
     draw_sparx(cxSparx2, cySparx2)     # -   Sparx 2
 
@@ -634,7 +432,6 @@ def main() -> None:
         zonemax = (coin_inf_droite[0] - coin_sup_gauche[0]) * (coin_inf_droite[1] - coin_sup_gauche[1])
     
     # Vitesse de déplacement du Joueur
-    
     dep: float = options['vitLent']
     
     # Vitesse de déplacement du QIX
@@ -648,101 +445,59 @@ def main() -> None:
 
     # Game state variables
     back: str = ""
-    direction_limit: str = ""
-    direction_counter: int = 0
     last_sparx1_direction: str = ""
     last_sparx2_direction: str = ""
     
+    # Initialize QIX movement system
+    playfield_bounds = ((coin_sup_gauche[0], coin_sup_gauche[1]), (coin_inf_droite[0], coin_inf_droite[1]))
+    qix_movement = QIXMovement(playfield_bounds, options['QIXSize'], depQIX)
+    qix_movement.set_position(cxQIX, cyQIX)
+    
     # Constants
-    DIRECTION_CHANGE_INTERVAL: int = 5
-    QIX_BOUNDARY_OFFSET: float = 10.0
     COLLISION_TOLERANCE: float = 5.0
     
     while True:
+        # Update QIX position using class-based movement
+        safe_zones = [lst_coordonnees_safezone]
+        cxQIX, cyQIX = qix_movement.update(safe_zones)
+            
+        # Update QIX visual
+        efface("QIX")
+        draw_square(cxQIX - options['QIXSize'] / 2, cyQIX - options['QIXSize'] / 2, 
+                   options['QIXSize'], "Red", "Red", "QIX")
+
+        # Original Sparx and other game logic timing
         if a % nb_delai == 0:
             a = 0
-            dxQIX = 0
-            dyQIX = 0
-            direction_counter += 1
-            cardinal_directions = ["nord", "sud", "est", "ouest"]
             
-            if direction_counter % DIRECTION_CHANGE_INTERVAL == 0:
-                direction_counter = 0
-                direction_limit = cardinal_directions[random.randint(0, 3)]
+            dxSparx1, dySparx1 = 0, 0
+            dxSparx1, dySparx1, last_sparx1_direction = mouvement_sparx(
+                cxSparx1,
+                cySparx1,
+                True,
+                last_sparx1_direction,
+                coin_sup_gauche, 
+                coin_inf_droite,
+                depSparx
+            )
+            cxSparx1 += dxSparx1
+            cySparx1 += dySparx1
 
-            for i in range(random.randint(1, 10)) :
-                x = random.randint(0, 6)
+            dxSparx2, dySparx2, last_sparx2_direction = mouvement_sparx(
+                cxSparx2,
+                cySparx2,
+                False,
+                last_sparx2_direction,
+                coin_sup_gauche, 
+                coin_inf_droite,
+                depSparx
+            )
+            cxSparx2 += dxSparx2
+            cySparx2 += dySparx2
 
-                # QIX movement with trigonometric calculations
-                if x == 1:
-                    if direction_limit == "nord":
-                        dyQIX = max(-depQIX, coin_sup_gauche[1] - QIX_BOUNDARY_OFFSET - cyQIX)  # Movement -> North
-                    elif direction_limit == "sud":
-                        dyQIX = min(depQIX, coin_inf_droite[1] + QIX_BOUNDARY_OFFSET - cyQIX)   # Movement -> South
-                    elif direction_limit == "est":
-                        dxQIX = min(depQIX, coin_inf_droite[0] + QIX_BOUNDARY_OFFSET - cxQIX)   # Movement -> East
-                    elif direction_limit == "ouest":
-                        dxQIX = max(-depQIX, coin_sup_gauche[0] - QIX_BOUNDARY_OFFSET - cxQIX)  # Movement -> West
-                elif x == 2:
-                    if direction_limit in ["nord", "est"]:
-                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0] + QIX_BOUNDARY_OFFSET - cxQIX))  # Movement -> Northeast
-                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1] - QIX_BOUNDARY_OFFSET - cyQIX))
-                    elif direction_limit in ["sud", "ouest"]:
-                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0] - QIX_BOUNDARY_OFFSET - cxQIX))  # Movement -> Southwest
-                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1] + QIX_BOUNDARY_OFFSET - cyQIX))
-                elif x == 3:
-                    if direction_limit in ["nord", "ouest"]:
-                        dxQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[0] - QIX_BOUNDARY_OFFSET - cxQIX))  # Movement -> Northwest
-                        dyQIX = round(max(-sin(pi/4)*depQIX, coin_sup_gauche[1] - QIX_BOUNDARY_OFFSET - cyQIX))
-                    elif direction_limit in ["sud", "est"]:
-                        dxQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[0] + QIX_BOUNDARY_OFFSET - cxQIX))   # Movement -> Southeast
-                        dyQIX = round(min(sin(pi/4)*depQIX, coin_inf_droite[1] + QIX_BOUNDARY_OFFSET - cyQIX))
-                if cxQIX + dxQIX > coin_inf_droite[0] or cxQIX + dxQIX < coin_sup_gauche[0] or cyQIX + dyQIX > coin_inf_droite[1] or cyQIX + dyQIX < coin_sup_gauche[1] :
-                    break
-                
-                if dxQIX != 0 or dyQIX != 0 :
-                    if test_interieur_safezone([lst_coordonnees_safezone],cxQIX,cyQIX):
-                        cxQIX += -dxQIX
-                        cyQIX += -dyQIX
-                        efface("QIX")
-                        draw_square(cxQIX - options['QIXSize'] / 2, cyQIX - options['QIXSize'] / 2, options['QIXSize'],"Red","Red","QIX")
-
-                    else :
-                        cxQIX += dxQIX
-                        cyQIX += dyQIX
-                        efface("QIX")
-                        draw_square(cxQIX - options['QIXSize'] / 2, cyQIX - options['QIXSize'] / 2, options['QIXSize'],"Red","Red","QIX")
-
-
-        dxSparx1, dySparx1 = 0, 0
-        dxSparx1, dySparx1, last_sparx1_direction = mouvement_sparx(
-            cxSparx1,
-            cySparx1,
-            True,
-            last_sparx1_direction,
-            coin_sup_gauche, 
-            coin_inf_droite,
-            depSparx
-        )
-        cxSparx1 += dxSparx1
-        cySparx1 += dySparx1
-
-        dxSparx2, dySparx2, last_sparx2_direction = mouvement_sparx(
-            cxSparx2,
-            cySparx2,
-            False,
-            last_sparx2_direction,
-            coin_sup_gauche, 
-            coin_inf_droite,
-            depSparx
-        )
-        cxSparx2 += dxSparx2
-        cySparx2 += dySparx2
-
-
-        efface("Sparx")
-        draw_sparx(cxSparx1, cySparx1)
-        draw_sparx(cxSparx2, cySparx2)
+            efface("Sparx")
+            draw_sparx(cxSparx1, cySparx1)
+            draw_sparx(cxSparx2, cySparx2)
 
 
 #   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
@@ -945,6 +700,8 @@ def main() -> None:
             depQIX += options['vitQIX+']
             cxQIX = WIDTH / 2
             cyQIX = (coin_inf_droite[1] - coin_sup_gauche[1]) / 4 + coin_sup_gauche[1]
+            qix_movement.base_speed = depQIX
+            qix_movement.set_position(cxQIX, cyQIX)
             draw_square(cxQIX - QIX_SIZE_HALF, cyQIX - QIX_SIZE_HALF, 
                        options['QIXSize'], "Red", "Red", "QIX")
 
