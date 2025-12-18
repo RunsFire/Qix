@@ -146,10 +146,20 @@ def _point_in_polygon(polygon: List[Tuple[float, float]], px: float, py: float) 
         return False
     
     # Bounding box quick rejection test
-    min_x = min(point[0] for point in polygon)
-    max_x = max(point[0] for point in polygon) 
-    min_y = min(point[1] for point in polygon)
-    max_y = max(point[1] for point in polygon)
+    min_x = float('inf')
+    max_x = float('-inf')
+    min_y = float('inf')
+    max_y = float('-inf')
+
+    for x, y in polygon:
+        if x < min_x:
+            min_x = x
+        if x > max_x:
+            max_x = x
+        if y < min_y:
+            min_y = y
+        if y > max_y:
+            max_y = y
     
     if px < min_x or px > max_x or py < min_y or py > max_y:
         return False

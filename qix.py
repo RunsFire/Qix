@@ -8,7 +8,7 @@ class QIXMovement:
     Handles QIX enemy movement with target-based curved trajectory algorithm.
     
     The QIX moves towards random targets using curved paths with sine wave
-    patterns, changing targets more frequently when close to the current target.
+    patterns.
     """
     
     def __init__(self, playfield_bounds: Tuple[Tuple[float, float], Tuple[float, float]], 
@@ -105,18 +105,8 @@ class QIXMovement:
         dy_to_target = self.target_y - self.y
         distance_to_target = (dx_to_target**2 + dy_to_target**2)**0.5
         
-        # Probability of changing target increases as QIX gets closer
-        max_distance = 200
-        proximity_factor = max(0, (max_distance - distance_to_target) / max_distance)
-        change_probability = proximity_factor * 0.02
-        
-        # Change target based on proximity or randomly
-        if distance_to_target < 30 or random.random() < change_probability:
-            self._choose_new_target(unsafe_zone)
-            # Recalculate after potential target change
-            dx_to_target = self.target_x - self.x
-            dy_to_target = self.target_y - self.y
-            distance_to_target = (dx_to_target**2 + dy_to_target**2)**0.5
+        # Check if target is reached
+        target_reached = distance_to_target < 30
         
         # Calculate movement with single arc trajectory
         if distance_to_target > 5:
@@ -161,12 +151,16 @@ class QIXMovement:
         next_x = self.x + dx
         next_y = self.y + dy
         
-        # Handle boundary collision or safe zone entry
-        if (next_x <= self.bounds_top_left[0] + self.boundary_offset or 
-            next_x >= self.bounds_bottom_right[0] - self.boundary_offset or
-            next_y <= self.bounds_top_left[1] + self.boundary_offset or 
-            next_y >= self.bounds_bottom_right[1] - self.boundary_offset or
-            not test_interieur_safezone(unsafe_zone, next_x, next_y)):
+        # Check for boundary collision or safe zone entry
+        boundary_hit = (next_x <= self.bounds_top_left[0] + self.boundary_offset or 
+                       next_x >= self.bounds_bottom_right[0] - self.boundary_offset or
+                       next_y <= self.bounds_top_left[1] + self.boundary_offset or 
+                       next_y >= self.bounds_bottom_right[1] - self.boundary_offset)
+        
+        safezone_entered = not test_interieur_safezone(unsafe_zone, next_x, next_y)
+        
+        # Change target only if target reached or entering safezone/boundary
+        if target_reached or boundary_hit or safezone_entered:
             self._choose_new_target(unsafe_zone)
         
         # Apply movement with boundary constraints
