@@ -35,7 +35,7 @@ def settings_menu() -> str:
         
         # Check button interactions
         for button in buttons:
-            if button.is_clicked(x_souris, y_souris):
+            if button.is_hovered(x_souris, y_souris):
                 button.highlight()
                 if tev == "ClicGauche":
                     return button.action

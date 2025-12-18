@@ -43,14 +43,14 @@ def variants_menu(variants: Set[str]) -> str:
         efface("rectangle")
         
         # Check menu button
-        if menu_button.is_clicked(x_souris, y_souris):
+        if menu_button.is_hovered(x_souris, y_souris):
             menu_button.highlight()
             if tev == "ClicGauche":
                 return "Principal"
         
         # Check variant buttons
         for button in variant_buttons:
-            if button.is_clicked(x_souris, y_souris):
+            if button.is_hovered(x_souris, y_souris):
                 button.highlight()
                 if tev == "ClicGauche":
                     if button.action in variants:

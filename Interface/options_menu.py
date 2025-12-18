@@ -1,5 +1,5 @@
 from typing import List
-from Interface.buttons import MenuButton, OptionButton
+from Interface.buttons import MenuButton, InputButton
 from Interface.const import COLORS, QIX_LOGO_PATH, WIDTH, HEIGHT
 from Interface.utils import read_input
 from fltk import image, rectangle, texte, ligne, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
@@ -31,38 +31,38 @@ def create_options_menu_ui() -> None:
     ligne(665, 535, 935, 535, "#45FFCA", 3, "ligne")
 
 
-def create_options_input_buttons() -> List[OptionButton]:
+def create_options_input_buttons() -> List[InputButton]:
     """Create all option input buttons for the left side."""
     buttons = [
-        OptionButton(75, 300, "Nombre d'obstacles", "obstacles", "nombre_obstacles"),
-        OptionButton(75, 375, "Nombre de bonus", "pommes", "nombre_pommes"),
-        OptionButton(75, 450, "Nombre de vies", "vies", "nombre_vies"),
-        OptionButton(75, 525, "Niveau initial", "nivInit", "nb_niveau"),
-        OptionButton(75, 600, "Vitesse lente", "vitLent", "nombre_JoueurSpd(n)"),
-        OptionButton(75, 675, "Vitesse rapide", "vitRap", "nombre_JoueurSpd(f)")
+        InputButton(75, 300, "Nombre d'obstacles", "obstacles", "nombre_obstacles"),
+        InputButton(75, 375, "Nombre de bonus", "pommes", "nombre_pommes"),
+        InputButton(75, 450, "Nombre de vies", "vies", "nombre_vies"),
+        InputButton(75, 525, "Niveau initial", "nivInit", "nb_niveau"),
+        InputButton(75, 600, "Vitesse lente", "vitLent", "nombre_JoueurSpd(n)"),
+        InputButton(75, 675, "Vitesse rapide", "vitRap", "nombre_JoueurSpd(f)")
     ]
     return buttons
 
 
-def create_options_input_buttons_right() -> List[OptionButton]:
+def create_options_input_buttons_right() -> List[InputButton]:
     """Create all option input buttons for the right side."""
     buttons = [
-        OptionButton(375, 300, "Vitesse du QIX", "vitQIX", "nb_QIXspdI"),
-        OptionButton(375, 375, "Vitesse du Sparx", "vitSp", "nb_SparxspdI"),
-        OptionButton(375, 450, "Zone à capturer", "aCapt", "nb_zone_a_capturerI"),
-        OptionButton(375, 525, "Taille du QIX", "QIXSize", "nb_tailleQIX"),
-        OptionButton(375, 600, "Taille du Joueur", "PlayerSize", "nb_tailleJoueur")
+        InputButton(375, 300, "Vitesse du QIX", "vitQIX", "nb_QIXspdI"),
+        InputButton(375, 375, "Vitesse du Sparx", "vitSp", "nb_SparxspdI"),
+        InputButton(375, 450, "Zone à capturer", "aCapt", "nb_zone_a_capturerI"),
+        InputButton(375, 525, "Taille du QIX", "QIXSize", "nb_tailleQIX"),
+        InputButton(375, 600, "Taille du Joueur", "PlayerSize", "nb_tailleJoueur")
     ]
     return buttons
 
 
-def create_options_input_buttons_increment() -> List[OptionButton]:
+def create_options_input_buttons_increment() -> List[InputButton]:
     """Create increment option input buttons."""
     buttons = [
-        OptionButton(675, 300, "Vitesse du QIX", "vitQIX+", "nb_QIXspd+"),
-        OptionButton(675, 375, "Vitesse du Sparx", "vitSp+", "nb_Sparxspd+"),
-        OptionButton(675, 545, "Incrémentation par", "niv+", "nb_+"),
-        OptionButton(675, 620, "Zone à capturer", "aCapt+", "nb_zone_a_capturer+")
+        InputButton(675, 300, "Vitesse du QIX", "vitQIX+", "nb_QIXspd+"),
+        InputButton(675, 375, "Vitesse du Sparx", "vitSp+", "nb_Sparxspd+"),
+        InputButton(675, 545, "Incrémentation par", "niv+", "nb_+"),
+        InputButton(675, 620, "Zone à capturer", "aCapt+", "nb_zone_a_capturer+")
     ]
     return buttons
 
@@ -81,8 +81,8 @@ def options_menu(options: dict) -> str:
     
     # Draw all option fields
     for button in all_option_buttons:
-        value = options[button.option]
-        if button.option == "aCapt" or button.option == "aCapt+":  # Zone percentage
+        value = options[button.identifier]
+        if button.identifier == "aCapt" or button.identifier == "aCapt+":  # Zone percentage
             value = f"{value} %"
         button.draw_full(value)
 
@@ -99,36 +99,36 @@ def options_menu(options: dict) -> str:
         efface("rectangle")
         
         # Check menu button interaction
-        if menu_button.is_clicked(x_souris, y_souris):
+        if menu_button.is_hovered(x_souris, y_souris):
             menu_button.highlight()
             if tev == "ClicGauche":
                 return "Parametres"
         
         # Check option button interactions
         for button in all_option_buttons:
-            if button.is_clicked(x_souris, y_souris):
+            if button.is_hovered(x_souris, y_souris):
                 button.highlight_input()
                 if tev == "ClicGauche":
                     efface(button.tag)
                     entree = read_input(True)
                     if entree != "":
                         # Handle special validation for different fields
-                        if button.option in ["vies", "nivInit"]:  # Lives and level - integers only
+                        if button.identifier in ["vies", "nivInit"]:  # Lives and level - integers only
                             if entree > "0" and "." not in entree:
-                                options[button.option] = int(entree)
-                        elif button.option == "aCapt":  # Zone capture percentage
+                                options[button.identifier] = int(entree)
+                        elif button.identifier == "aCapt":  # Zone capture percentage
                             val = float(entree)
                             if 0 < val < 100:
-                                options[button.option] = val
+                                options[button.identifier] = val
                         else:  # General numeric input
                             if "." in entree:
-                                options[button.option] = float(entree)
+                                options[button.identifier] = float(entree)
                             else:
-                                options[button.option] = int(entree)
+                                options[button.identifier] = int(entree)
                     
                     # Redraw the field with new value
-                    value = options[button.option]
-                    if button.option == "aCapt" or button.option == "aCapt+":
+                    value = options[button.identifier]
+                    if button.identifier == "aCapt" or button.identifier == "aCapt+":
                         value = f"{value} %"
                     texte(button.x + button.width//2, button.y + button.height//2, 
                          str(value), COLORS["text"], "center", taille=15, tag=button.tag)

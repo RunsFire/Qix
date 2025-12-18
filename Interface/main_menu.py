@@ -102,7 +102,7 @@ def main_menu() -> Optional[str]:
         
         # Check button interactions
         for button in buttons:
-            if button.is_clicked(mouse_x, mouse_y):
+            if button.is_hovered(mouse_x, mouse_y):
                 button.highlight()
                 if tev == "ClicGauche":
                     if button.action == "Quitter":
