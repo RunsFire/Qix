@@ -558,7 +558,9 @@ def main() -> None:
             
             # Drawing logic when not hitting obstacles
             if dessiner and not obstacle:
-                if coordonnees_debut is None:  # Test if player is on border
+                
+                # Test if player is on border
+                if coordonnees_debut is None:
                     # Test if player exits safe zone
                     coordonnees_debut = test_sortie_safezone(
                         lst_coordonnees_safezone, cx, cy, dx, dy, dep
@@ -569,58 +571,59 @@ def main() -> None:
                         if test_interieur_safezone(lst_coordonnees_safezone, cx, cy):
                             ligne(cx - dx, cy - dy, cx, cy, "Gold", tag="Trainée")
                             lst_coordonnees_curseur.append((cx, cy))
-                        else:  # Cancel movement if not going toward game zone
+
+                        # Cancel movement if not going toward game zone
+                        else:
                             cx = cx - dx
                             cy = cy - dy
                             coordonnees_debut = None
+
+                # Player is drawing a trail
                 else:
                     lst_coordonnees_curseur.append((cx, cy))
                     ligne(cx - dx, cy - dy, cx, cy, "Gold", tag = "Trainée")
-                    if perdu == True :
-                        pass
-                    elif test_entree_safezone(lst_coordonnees_safezone,int(cx),int(cy)) :       # Test pour savoir si le joueur entre dans la safezone
-                        lst_coordonnees_curseur.insert(0, coordonnees_debut)        # Insertion de la première coordonnée du polygone formé par le joueur
-                        lst_coordonnees_curseur = sommets(lst_coordonnees_curseur)  # Fonction pour réduire le nombre de coordonnées dans lst_coordonnees_curseur
-                        lst_coordonnees_curseur = cw_a_ccw(lst_coordonnees_curseur) # Fonction pour faire en sorte que les coordonnées du polygone formé par le joueur soit dans le sens contraine de l'aiguille d'une montre (ccw)
-                        lst_coordonnees_safezone, coordonnees_supprime = concatenation_safezone(lst_coordonnees_safezone, lst_coordonnees_curseur)  # Ajout et suppression des coordonnées de la safezone
+                    
+                    # Capture the zone if player re-enters safe zone
+                    if not perdu and test_entree_safezone(lst_coordonnees_safezone,int(cx),int(cy)) :
+                        # Insert the starting coordinate of the polygon,
+                        # process the coordinates, and update the safe zone
+                        lst_coordonnees_curseur.insert(0, coordonnees_debut)
+                        lst_coordonnees_curseur = sommets(lst_coordonnees_curseur)
+                        lst_coordonnees_curseur = cw_a_ccw(lst_coordonnees_curseur)
+                        lst_coordonnees_safezone, coordonnees_supprime = concatenation_safezone(lst_coordonnees_safezone, lst_coordonnees_curseur)
 
-                        if coordonnees_supprime is not None:  # Preserve previously drawn polygons
+                        # Preserve previously drawn polygons
+                        if coordonnees_supprime is not None:
                             lst_coordonnees_curseur = lst_coordonnees_curseur + coordonnees_supprime
 
-                        # Zone capture logic with error handling
-                        try:
-                            couleur = "green" if dep == options['vitRap'] else "dark blue"
+                        # Zone capture logic
+                        couleur = "green" if dep == options['vitRap'] else "dark blue"
 
-                            # Check if QIX is inside the captured zone
-                            if test_interieur_safezone(lst_coordonnees_safezone, cxQIX, cyQIX):
-                                polygone(lst_coordonnees_curseur, "white", couleur, tag="ZoneC")
-                                lst_coordonnees_polygones.append(lst_coordonnees_curseur)
-                            else:
-                                polygone(lst_coordonnees_safezone, "white", couleur, tag="ZoneC")
-                                lst_coordonnees_polygones.append(lst_coordonnees_safezone)
-                                lst_coordonnees_safezone = list(lst_coordonnees_curseur)
+                        # Check if QIX is inside the captured zone
+                        if test_interieur_safezone(lst_coordonnees_safezone, cxQIX, cyQIX):
+                            polygone(lst_coordonnees_curseur, "white", couleur, tag="ZoneC")
+                            lst_coordonnees_polygones.append(lst_coordonnees_curseur)
+                        else:
+                            polygone(lst_coordonnees_safezone, "white", couleur, tag="ZoneC")
+                            lst_coordonnees_polygones.append(lst_coordonnees_safezone)
+                            lst_coordonnees_safezone = list(lst_coordonnees_curseur)
 
-                            lst_coordonnees_safezone, coordonnees_debut_safezone = debut_egal_fin(
-                                lst_coordonnees_safezone, coordonnees_debut_safezone
-                            )
-                            lst_coordonnees_safezone = sommets(lst_coordonnees_safezone)
+                        lst_coordonnees_safezone, coordonnees_debut_safezone = debut_egal_fin(
+                            lst_coordonnees_safezone, coordonnees_debut_safezone
+                        )
+                        lst_coordonnees_safezone = sommets(lst_coordonnees_safezone)
 
-                            # Calculate area with error handling
-                            safe_zone_area = aire(lst_coordonnees_safezone, True)
-                            if zonemax > 0:  # Prevent division by zero
-                                zonetot = ((zonemax - safe_zone_area) / zonemax) * 100
-                            else:
-                                zonetot = 0
-                                
-                            # Update score
-                            if score is not None:
-                                efface("score")
-                                area_bonus = safe_zone_area * (15 - float(dep))
-                                score = score + int(area_bonus // 10000)
-                                
-                        except (ZeroDivisionError, ValueError) as e:
-                            print(f"Error in zone calculation: {e}")
-                            zonetot = 0
+                        safe_zone_area = aire(lst_coordonnees_safezone, True)
+                        if zonemax > 0:  # Prevent division by zero
+                            zonetot = ((zonemax - safe_zone_area) / zonemax) * 100
+                        else:
+                            raise ValueError("Maximum zone area is zero, cannot calculate captured zone percentage.")
+                            
+                        # Update score
+                        if score is not None:
+                            efface("score")
+                            area_bonus = safe_zone_area * (15 - float(dep))
+                            score = score + int(area_bonus // 10000)
                             
                         # Clean up display
                         efface("Trainée")
@@ -634,8 +637,8 @@ def main() -> None:
                         lst_coordonnees_curseur = []
                         coordonnees_debut = None
                         coordonnees_supprime = None
-                        perdu = False
                         update_action(zonetot, score)
+
             draw_player(cx, cy, rayon)
             obstacle = False
 
@@ -659,13 +662,7 @@ def main() -> None:
         mise_a_jour()
 
 
-
-
-
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-#   *                        Défaite / Victoire                         *
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-    
+        # Victory and level progression    
         if zonetot >= zone_a_capture:
             niveau += 1
             show_level_complete(niveau)
@@ -735,7 +732,7 @@ def main() -> None:
                 ]
             ]
 
-
+        # Life loss handling
         if perdu:
             nbVies -= 1
             show_game_over(nbVies)
