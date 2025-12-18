@@ -1,7 +1,8 @@
+import os
 from typing import Optional, List
-from Interface.const import COLORS, WIDTH, HEIGHT
+from Interface.const import COLORS, QIX_LOGO_PATH, WIDTH, HEIGHT
 from Interface.buttons import MenuButton
-from fltk import rectangle, texte, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
+from fltk import image, rectangle, texte, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
 
 
 def handle_escape_confirmation() -> bool:
@@ -84,8 +85,9 @@ def main_menu() -> Optional[str]:
     Returns:
         Selected action or None to quit
     """
-    rectangle(0, 0, WIDTH, HEIGHT, COLORS["background"], 
-             COLORS["background"], 1, "bg")
+    rectangle(0, 0, WIDTH, HEIGHT, COLORS["background"], COLORS["background"], 1, "bg")
+    img_height = 80
+    image(WIDTH//2,125, QIX_LOGO_PATH, ancrage="center", tag="im", largeur=int(img_height * (414/188)), hauteur=img_height)
     
     buttons = create_menu_buttons()
     for button in buttons:

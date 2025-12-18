@@ -24,16 +24,16 @@ def menu_controller(variants: Set[str], options: Dict[str, Union[float, int]], k
         if choice == "Principal" :
             choice = main_menu()
         elif choice == "Variantes" :
-            choice = variants_menu(WIDTH, HEIGHT, variants)
+            choice = variants_menu(variants)
         elif choice == "Parametres" :
             while choice != None and choice != "Principal" :
                 efface_tout()
                 if choice == "Parametres" :
-                    choice = settings_menu(WIDTH, HEIGHT)
+                    choice = settings_menu()
                 elif choice == "Options" :
-                    choice = options_menu(WIDTH, HEIGHT, options)
+                    choice = options_menu(options)
                 elif choice == "Touches" :
-                    choice = key_menu(WIDTH, HEIGHT, keys)
+                    choice = key_menu(keys)
         elif choice == "Commencer" :
             efface_tout()
             break

@@ -1,7 +1,7 @@
 import os
-from typing import List, Tuple, Optional
+from typing import Tuple, Optional
 from fltk import image, rectangle, texte, attend_clic_gauche, efface, ligne
-from Interface.const import WIDTH, HEIGHT, COLORS, FONTS, PATH
+from Interface.const import QIX_LOGO_PATH, WIDTH, HEIGHT, COLORS, FONTS, PATH
 
 def _draw_ui_elements(captured_zone: float, target_zone: float, lives: int, 
                      level: int, score: Optional[int]) -> None:
@@ -61,7 +61,10 @@ def start_game(captured_zone: float, target_zone: float, lives: int,
              "white", tag="ZdJ")
     
     # Logo placeholder
-    rectangle(320, 352, 680, 548, "white", epaisseur="5", tag="im")
+    x1, y1, x2, y2 = 320, 352, 680, 548
+    rectangle(x1, y1, x2, y2, "white", epaisseur="5", tag="im")
+    img_height = y2 - y1 - 110
+    image(WIDTH / 2, HEIGHT / 2, QIX_LOGO_PATH, ancrage="center", tag="im", largeur=int(img_height * (414/188)), hauteur=img_height)
     attend_clic_gauche()
     efface("im")
     

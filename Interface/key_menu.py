@@ -1,7 +1,7 @@
 from typing import List, Dict
-from Interface.const import COLORS
+from Interface.const import COLORS, QIX_LOGO_PATH, WIDTH, HEIGHT
 from Interface.buttons import MenuButton, KeyButton
-from fltk import rectangle, texte, ligne, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
+from fltk import image, rectangle, texte, ligne, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
 from Interface.utils import read_input
 
 
@@ -31,10 +31,11 @@ def create_key_buttons_player2() -> List[KeyButton]:
     return buttons
 
 
-def key_menu(width: int, height: int, keys: Dict[str, str]) -> str:
+def key_menu(keys: Dict[str, str]) -> str:
     """Display key bindings configuration menu."""
-    rectangle(0, 0, width, height, COLORS["background"], COLORS["background"], 1, "bg")
-    # image(largeurFenetre//2,125, os.path.join(PATH,'QIX_logo.gif'), ancrage="center", tag="im", largeur=300, hauteur=int(188*(300/414)))
+    rectangle(0, 0, WIDTH, HEIGHT, COLORS["background"], COLORS["background"], 1, "bg")
+    img_height = 80
+    image(WIDTH//2,125, QIX_LOGO_PATH, ancrage="center", tag="im", largeur=int(img_height * (414/188)), hauteur=img_height)
 
     entree = ""
 
@@ -58,7 +59,7 @@ def key_menu(width: int, height: int, keys: Dict[str, str]) -> str:
         button.draw_full(key_name)
 
     # Create and draw menu button
-    menu_button = MenuButton(width // 2 - 200, height - 100, 400, 50,
+    menu_button = MenuButton(WIDTH // 2 - 200, HEIGHT - 100, 400, 50,
                      "Paramètres", "Parametres")
     menu_button.draw()
     

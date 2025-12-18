@@ -4,7 +4,8 @@ import os
 WIDTH = 1000
 HEIGHT = 900
 PATH = os.getcwd()
-
+QIX_LOGO_PATH = os.path.join(PATH, 'QIX_logo.gif')
+  
 # UI Constants
 BUTTON_WIDTH = 400
 BUTTON_HEIGHT = 50

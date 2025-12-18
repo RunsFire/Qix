@@ -1,6 +1,7 @@
 from typing import Set, List
 from Interface.buttons import MenuButton
-from fltk import rectangle, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
+from Interface.const import QIX_LOGO_PATH, COLORS, WIDTH, HEIGHT
+from fltk import image, image, rectangle, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
 
 
 def create_variant_buttons() -> List[MenuButton]:
@@ -17,10 +18,12 @@ def create_variant_buttons() -> List[MenuButton]:
     return buttons
 
 
-def variants_menu(width: int, height: int, variants: Set[str]) -> str:
+def variants_menu(variants: Set[str]) -> str:
     """Display variants selection menu."""
-    rectangle(0, 0, width, height, "black", "black", 1, "bg")
-    
+    rectangle(0, 0, WIDTH, HEIGHT, COLORS["background"], COLORS["background"], 1, "bg")
+    img_height = 80
+    image(WIDTH//2,125, QIX_LOGO_PATH, ancrage="center", tag="im", largeur=int(img_height * (414/188)), hauteur=img_height)
+
     # Create variant buttons and set their selection state
     variant_buttons = create_variant_buttons()
     for button in variant_buttons:
@@ -28,7 +31,7 @@ def variants_menu(width: int, height: int, variants: Set[str]) -> str:
         button.draw()
 
     # Create and draw menu button
-    menu_button = MenuButton(width // 2 - 200, height - 150, 400, 50,
+    menu_button = MenuButton(WIDTH // 2 - 200, HEIGHT - 150, 400, 50,
                      "Menu Principal", "Principal")
     menu_button.draw()
 

@@ -1,13 +1,15 @@
 from typing import List
 from Interface.buttons import MenuButton, OptionButton
-from Interface.const import COLORS, WIDTH, HEIGHT
+from Interface.const import COLORS, QIX_LOGO_PATH, WIDTH, HEIGHT
 from Interface.utils import read_input
-from fltk import rectangle, texte, ligne, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
+from fltk import image, rectangle, texte, ligne, touche, donne_ev, type_ev, abscisse_souris, ordonnee_souris, mise_a_jour, efface
 
 
 def create_options_menu_ui() -> None:
     """Create the static UI elements for the options menu."""
     rectangle(0, 0, WIDTH, HEIGHT, COLORS["background"], COLORS["background"], 1, "bg")
+    img_height = 80
+    image(WIDTH//2,125, QIX_LOGO_PATH, ancrage="center", tag="im", largeur=int(img_height * (414/188)), hauteur=img_height)
     
     # Draw section frames
     rectangle(65, 200, 335, 735, COLORS["accent"], epaisseur=3, tag="cadre")
@@ -65,7 +67,7 @@ def create_options_input_buttons_increment() -> List[OptionButton]:
     return buttons
 
 
-def options_menu(width: int, height: int, options: dict) -> str:
+def options_menu(options: dict) -> str:
     """Display options configuration menu."""
     
     # Draw static UI elements
@@ -85,7 +87,7 @@ def options_menu(width: int, height: int, options: dict) -> str:
         button.draw_full(value)
 
     # Create and draw menu button
-    menu_button = MenuButton(width // 2 - 200, height - 100, 400, 50,
+    menu_button = MenuButton(WIDTH // 2 - 200, HEIGHT - 100, 400, 50,
                      "Paramètres", "Parametres")
     menu_button.draw()
 
