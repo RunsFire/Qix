@@ -459,7 +459,7 @@ def main() -> None:
     while True:
         # Update QIX position using class-based movement
         cxQIX, cyQIX = qix_movement.update(lst_coordonnees_safezone)
-            
+
         # Update QIX visual
         efface("QIX")
         draw_square(cxQIX - options['QIXSize'] / 2, cyQIX - options['QIXSize'] / 2, 
@@ -499,11 +499,6 @@ def main() -> None:
             draw_sparx(cxSparx2, cySparx2)
 
 
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-#   *                              Joueur                               *
-#   * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
-
-
         # Player movement input handling
         ev = donne_ev()
         tev = type_ev(ev)
@@ -533,18 +528,19 @@ def main() -> None:
                 draw_status(2)
                 dessiner = True
 
+        # Check for QIX collision with player trail
+        perdu = test_perte(
+            coordonnees_debut,
+            (cx + dx, cy + dy),
+            (cxQIX, cyQIX),
+            options['QIXSize'],
+            lst_coordonnees_curseur,
+            not (dx != 0 or dy != 0)
+        )
+
         # Process player movement
         if dx != 0 or dy != 0:
             efface('curseur')
-            
-            # Test for collision with QIX - fix: use center coordinates and correct size
-            perdu = test_perte(
-                coordonnees_debut, # type: ignore
-                (cx + dx, cy + dy),
-                (cxQIX, cyQIX),  # Use center coordinates, not offset
-                options['QIXSize'],  # Use QIX size, not capture area
-                lst_coordonnees_curseur
-            )
 
             cx += dx
             cy += dy

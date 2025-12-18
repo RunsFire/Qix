@@ -5,7 +5,14 @@ import random
 
 
 
-def test_perte(cd_debut: Tuple[float, float], cd_joueur: Tuple[float, float], cd_QIX: Tuple[float, float], cote: float, lst_joueur: List[Tuple[float, float]]) -> bool:
+def test_perte(
+        cd_debut: Optional[Tuple[float, float]],
+        cd_joueur: Tuple[float, float],
+        cd_QIX: Tuple[float, float],
+        qix_size: float,
+        lst_joueur: List[Tuple[float, float]],
+        is_immobile: bool
+    ) -> bool:
     """
     Test if the player loses due to collision with QIX or self-intersection.
     
@@ -13,32 +20,36 @@ def test_perte(cd_debut: Tuple[float, float], cd_joueur: Tuple[float, float], cd
         cd_debut: Starting coordinates of player trail
         cd_joueur: Current player coordinates  
         cd_QIX: QIX center coordinates
-        cote: QIX size (width/height)
+        qix_size: QIX size (width/height)
         lst_joueur: List of player trail coordinates
+        is_immobile: Whether the player is currently immobile
         
     Returns:
         True if collision detected, False otherwise
     """
+    # Player is on safe zone
+    if cd_debut is None:
+        return False
+
     # Check if player returned to starting position
     if cd_debut == cd_joueur:
         return True
     
-    # Calculate QIX bounds from center coordinates
-    qix_half_size = cote / 2
-    qix_left = cd_QIX[0] - qix_half_size
-    qix_right = cd_QIX[0] + qix_half_size
-    qix_top = cd_QIX[1] - qix_half_size
-    qix_bottom = cd_QIX[1] + qix_half_size
-    
+    qix_left = cd_QIX[0] - qix_size / 2
+    qix_right = cd_QIX[0] + qix_size / 2
+    qix_top = cd_QIX[1] - qix_size / 2
+    qix_bottom = cd_QIX[1] + qix_size / 2
+
     # Check QIX collision with trail and self-intersection
-    for element in lst_joueur:
+    for i, element in enumerate(lst_joueur):
         # Check if QIX collides with any trail point
         if (qix_left <= element[0] <= qix_right and 
             qix_top <= element[1] <= qix_bottom):
             return True
         # Check for self-intersection
         if cd_joueur == element:
-            return True
+            # Allow last point if player is immobile
+            return not (is_immobile and i == len(lst_joueur) - 1)
             
     return False
 
