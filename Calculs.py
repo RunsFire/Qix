@@ -75,7 +75,8 @@ def sommets(lst: List[Tuple[float, float]]) -> List[Tuple[float, float]] :
       [(195, 800), (200, 800)]
     """
     assert lst != []
-    if len(lst) <= 2 :
+    length = len(lst)
+    if length <= 2 :
         return lst
     lst_sommets = [lst[0]]
     coordonnee2 = lst[0]
@@ -94,7 +95,7 @@ def sommets(lst: List[Tuple[float, float]]) -> List[Tuple[float, float]] :
             else :
                 lst_sommets.append(coordonnee2)
                 coordonnee1 = element
-        if i == len(lst)-1 :
+        if i == length-1 :
             lst_sommets.append(element)
         i += 1
     return lst_sommets
@@ -194,8 +195,9 @@ def cw_a_ccw(M: List[Tuple[float, float]]) -> List[Tuple[float, float]] :
       >>> cw_a_ccw([(300,450),(300,800)])
       [(300, 450), (300, 800)]
     """
-    assert len(M) != 1
-    if len(M) == 2 :
+    length = len(M)
+    assert length != 1
+    if length == 2 :
         if M[0][0] == M[1][0] :
             if M[0][1] > M[1][1] :
                 M.reverse()
@@ -229,18 +231,20 @@ def concatenation_safezone(lst_safezone: List[Tuple[float, float]], zone_capture
       ValueError: If the captured zone coordinates don't correspond to the safezone.
     """
     sommets_supprime = []
-    for i in range (len(lst_safezone) - 1) :
-
+    for i in range(len(lst_safezone) - 1) :
         if ((zone_capturee[0][0] == lst_safezone[i][0] and zone_capturee[0][0] != zone_capturee[-1][0]    # Vérifie si le 1er point de la zone capturée
         and  encadrement_deux_sens(lst_safezone[i][1],zone_capturee[0][1],lst_safezone[i+1][1],True,True))                  # n'est pas sur la même ligne de la safezone
         or  (zone_capturee[0][1] != zone_capturee[-1][1] and zone_capturee[0][1] == lst_safezone[i][1]    # que le dernier
         and  encadrement_deux_sens(lst_safezone[i][0],zone_capturee[0][0],lst_safezone[i+1][0],True,True))) :               # (avec coordonnées x et y)
             while True :
-                if (lst_safezone[i+1][0] == zone_capturee[-1][0] or lst_safezone[i+1][1] == zone_capturee[-1][1]) :
-                    sommets_supprime.append(lst_safezone.pop(i+1))
+                if i + 1 < len(lst_safezone) and len(lst_safezone[i+1]) > 0:
+                    if (lst_safezone[i+1][0] == zone_capturee[-1][0] or lst_safezone[i+1][1] == zone_capturee[-1][1]) :
+                        sommets_supprime.append(lst_safezone.pop(i+1))
+                        break
+                    else :
+                        sommets_supprime.append(lst_safezone.pop(i+1))
+                else:
                     break
-                else :
-                    sommets_supprime.append(lst_safezone.pop(i+1))
             sommets_supprime.reverse()                                                  # Pour que la liste des coordonnées soit dans le bon sens
             lst_safezone = lst_safezone[:i+1] + zone_capturee + lst_safezone[i+1:]      # Insertion des éléments de la zone_capturee dans lst_safezone
             return (lst_safezone, sommets_supprime)
@@ -313,20 +317,21 @@ def debut_egal_fin(lst_safezone: List[Tuple[float, float]] , debut_safezone: Lis
         - The updated safezone coordinates as a list of (x, y) tuples
         - The updated debut_safezone coordinates as a list of (x, y) tuples
     """
+    length = len(lst_safezone)
     lst_safezone_copie = list(lst_safezone)
 
-    if [lst_safezone[0],lst_safezone[1]] != debut_safezone and [lst_safezone[len(lst_safezone)-2],lst_safezone[len(lst_safezone)-1]] != debut_safezone :
-        lst_safezone_copie.insert(0,lst_safezone[len(lst_safezone)-1])
+    if [lst_safezone[0],lst_safezone[1]] != debut_safezone and [lst_safezone[length-2],lst_safezone[length-1]] != debut_safezone :
+        lst_safezone_copie.insert(0,lst_safezone[length-1])
         lst_safezone_copie.append(lst_safezone[0])
-        debut_safezone = [lst_safezone[len(lst_safezone)-1],lst_safezone[0]]
+        debut_safezone = [lst_safezone[length-1],lst_safezone[0]]
         return lst_safezone_copie, debut_safezone
 
     elif [lst_safezone[0],lst_safezone[1]] != debut_safezone :
         debut_safezone = [lst_safezone[0],lst_safezone[1]]
-        lst_safezone[len(lst_safezone)-2], lst_safezone[len(lst_safezone)-1] = debut_safezone[0], debut_safezone[1]
+        lst_safezone[length-2], lst_safezone[length-1] = debut_safezone[0], debut_safezone[1]
 
-    elif [lst_safezone[len(lst_safezone)-2],lst_safezone[len(lst_safezone)-1]] != debut_safezone :
-        debut_safezone = [lst_safezone[len(lst_safezone)-2], lst_safezone[len(lst_safezone)-1]]
+    elif [lst_safezone[length-2],lst_safezone[length-1]] != debut_safezone :
+        debut_safezone = [lst_safezone[length-2], lst_safezone[length-1]]
         lst_safezone[0], lst_safezone[1] = debut_safezone[0], debut_safezone[1]
         
     return lst_safezone, debut_safezone

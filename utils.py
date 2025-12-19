@@ -87,6 +87,7 @@ def test_sortie_safezone(lst_safezone: List[Tuple[float, float]], cx: float, cy:
             if encadrement_deux_sens(lst_safezone[i][1],cy-dy,lst_safezone[i+1][1],False,False) :
                 if cx == lst_safezone[i][0] + dep or cx == lst_safezone[i][0] - dep :
                     return (cx - dx, cy - dy)
+    return None
 
 
 def test_entree_safezone(lst_safezone: List[Tuple[float, float]], cx: int, cy: int) -> bool:
@@ -168,7 +169,7 @@ def _point_in_polygon(polygon: List[Tuple[float, float]], px: float, py: float) 
     inside = False
     j = len(polygon) - 1  # Last vertex
     
-    for i in range(len(polygon)):
+    for i in range(j+1):
         xi, yi = polygon[i]
         xj, yj = polygon[j]
         
