@@ -127,11 +127,11 @@ def encadrement(element1: float, element2: float, element3: float, egal1=True, e
       >>> encadrement(2,2,3,True,False)
       True
     """
-    if egal1 == True :
+    if egal1:
         resultat1 = element1 <= element2
     else :
         resultat1 = element1 < element2
-    if egal2 == True :
+    if egal2:
         resultat2 = element2 <= element3
     else :
         resultat2 = element2 < element3

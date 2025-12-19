@@ -1,4 +1,9 @@
+# IDE
+.idea/
+
+# other
 __pycache__/
 **/__pycache__/
-*.stats
-*.bin
+
+# Virtual Environments
+venv/
