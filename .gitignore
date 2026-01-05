@@ -1,0 +1,9 @@
+# IDE
+.idea/
+
+# other
+__pycache__/
+**/__pycache__/
+
+# Virtual Environments
+venv/
